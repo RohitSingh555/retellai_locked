@@ -1,11 +1,90 @@
 from openai import OpenAI
+from PyPDF2 import PdfReader
 import os
 import json
 from custom_types import CustomLlmRequest, CustomLlmResponse, Utterance
 from typing import List
 
-begin_sentence = "Hey there, I'm your personal AI therapist, how can I help you?"
-agent_prompt = "Task: As a professional therapist, your responsibilities are comprehensive and patient-centered. You establish a positive and trusting rapport with patients, diagnosing and treating mental health disorders. Your role involves creating tailored treatment plans based on individual patient needs and circumstances. Regular meetings with patients are essential for providing counseling and treatment, and for adjusting plans as needed. You conduct ongoing assessments to monitor patient progress, involve and advise family members when appropriate, and refer patients to external specialists or agencies if required. Keeping thorough records of patient interactions and progress is crucial. You also adhere to all safety protocols and maintain strict client confidentiality. Additionally, you contribute to the practice's overall success by completing related tasks as needed.\n\nConversational Style: Communicate concisely and conversationally. Aim for responses in short, clear prose, ideally under 10 words. This succinct approach helps in maintaining clarity and focus during patient interactions.\n\nPersonality: Your approach should be empathetic and understanding, balancing compassion with maintaining a professional stance on what is best for the patient. It's important to listen actively and empathize without overly agreeing with the patient, ensuring that your professional opinion guides the therapeutic process."
+def extract_text_from_pdf(pdf_file):
+    text = ""
+    with open(pdf_file, "rb") as file:
+        reader = PdfReader(file)
+        for page in reader.pages:
+            text += page.extract_text()
+    return text
+
+def extract_information_ai(text):
+    api_key = os.environ['RETELL_API_KEY']
+    print(api_key)
+    openai = OpenAI(api_key=api_key)
+
+    prompt = """
+    Extract the following information from the provided resume text:
+
+    [Resume Text]
+
+    Please provide the extracted information in JSON format with the following structure:
+
+    {
+        "personal_information": {
+            "Name": "Extract the name of the candidate.",
+            "Email": "Extract the email address of the candidate.",
+            "Phone": "Extract the phone number of the candidate.",
+            "Address": "Extract the address of the candidate.",
+            "Date of Birth": "Extract the date of birth of the candidate.",
+            "LinkedIn": "Extract the LinkedIn profile link of the candidate."
+            "introduction": "Extract the string where user tells about himself/explains what he has done and not done."
+        },
+        "experience": {
+            "Position": "Extract the position held by the candidate.",
+            "Company": "Extract the company name where the candidate worked.",
+            "Start Date": "Extract the start date of employment.",
+            "End Date": "Extract the end date of employment."
+        },
+        "education": {
+            "Degree": "Extract the degree obtained by the candidate.",
+            "College": "Extract the college or university name.",
+            "Start Date": "Extract the start date of education.",
+            "End Date": "Extract the end date of education."
+        },
+        "skills": "Extract the skills mentioned by the candidate.",
+        "projects": "Extract the project names along with relevant information.",
+        "certifications": "Extract any certifications obtained by the candidate.",
+    }
+    """
+
+    response = openai.completions.create(
+        model="gpt-3.5-turbo-instruct",
+        prompt=prompt.replace("[Resume Text]", text),
+        max_tokens=500,
+        n=1,
+        stop=["##"]
+    )
+
+    extracted_info = response.choices[0].text.strip()
+
+    return extracted_info
+
+
+
+if __name__ == "__main__":
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    pdf_file = os.path.join(script_dir, "resume.pdf")
+
+    resume_text = extract_text_from_pdf(pdf_file)
+
+    extracted_info = extract_information_ai(resume_text)
+    # print(extracted_info)
+
+    # Convert extracted information to JSON format
+    # extracted_info_json = json.loads(extracted_info)
+
+
+    print("Extracted Information:",extracted_info)
+
+begin_sentence = "Hello! Welcome to the {extracted_info} interview screening. I am here to assess your suitability for the {} position."
+agent_prompt = "As a professional interviewer ask questions based on this information{extracted_info}, your responsibilities are multifaceted and candidate-centered. You aim to establish a positive and productive atmosphere with job applicants, evaluating their qualifications and fit for the position. Your role involves conducting thorough assessments of candidate skills and experiences, probing into their past work and achievements. Engage in active listening and thoughtful questioning to gain insights into their capabilities and potential contributions to the organization. Regular communication and feedback with candidates are essential for guiding them through the hiring process and providing clarity on expectations. Additionally, you adhere to all hiring protocols and maintain confidentiality throughout the selection process. Your goal is to ensure a fair and effective recruitment process that aligns with the company's goals and values. Communicate concisely and professionally. Aim for responses in clear and straightforward language, keeping exchanges focused and purposeful. This approach facilitates meaningful interactions and fosters a positive candidate experience. Your approach should be professional yet personable, demonstrating respect and empathy towards candidates while maintaining objectivity in your assessments. Strive to build rapport and trust with applicants, encouraging open communication and honest dialogue. It's important to provide constructive feedback and guidance, helping candidates understand areas for improvement and maximizing their potential for success.".format(extracted_info, "{}")
+
 
 class LlmClient:
     def __init__(self):
@@ -68,7 +147,7 @@ class LlmClient:
                         "properties": {
                             "message": {
                                 "type": "string",
-                                "description": "The message you will say before ending the call with the customer.",
+                                "description": "Thank you for your time and thoughtful responses. We appreciate your interest in the position and will be in touch soon regarding the next steps in the hiring process.",
                             },
                         },
                         "required": ["message"],
