@@ -29,39 +29,39 @@ def extract_information_ai(text):
     Please provide the extracted information in JSON format with the following structure:
 
     {
-        "personal_information": {
-            "Name": "Extract the name of the candidate.",
-            "Email": "Extract the email address of the candidate.",
-            "Phone": "Extract the phone number of the candidate.",
-            "Address": "Extract the address of the candidate.",
-            "Date of Birth": "Extract the date of birth of the candidate.",
-            "LinkedIn": "Extract the LinkedIn profile link of the candidate."
-            "introduction": "Extract the string where user tells about himself/explains what he has done and not done."
-        },
-        "experience": {
-            "Position": "Extract the position held by the candidate.",
-            "Company": "Extract the company name where the candidate worked.",
-            "Start Date": "Extract the start date of employment.",
-            "End Date": "Extract the end date of employment."
-        },
-        "education": {
-            "Degree": "Extract the degree obtained by the candidate.",
-            "College": "Extract the college or university name.",
-            "Start Date": "Extract the start date of education.",
-            "End Date": "Extract the end date of education."
-        },
-        "skills": "Extract the skills mentioned by the candidate.",
-        "projects": "Extract the project names along with relevant information.",
-        "certifications": "Extract any certifications obtained by the candidate.",
+    "personal_information": {
+        "Name": "Extract the name of the candidate.",
+        "Email": "Extract the email address of the candidate.",
+        "Phone": "Extract the phone number of the candidate.",
+        "Address": "Extract the address of the candidate.",
+        "Date of Birth": "Extract the date of birth of the candidate.",
+        "LinkedIn": "Extract the LinkedIn profile link of the candidate.",
+        "introduction": "Extract the string where user tells about himself/explains what he has done and not done."
+    },
+    "experience": {
+        "Position": "Extract the position held by the candidate.",
+        "Company": "Extract the company name where the candidate worked.",
+        "Start Date": "Extract the start date of employment.",
+        "End Date": "Extract the end date of employment."
+    },
+    "education": {
+        "Degree": "Extract the degree obtained by the candidate.",
+        "College": "Extract the college or university name.",
+        "Start Date": "Extract the start date of education.",
+        "End Date": "Extract the end date of education."
+    },
+    "skills": "Extract the skills mentioned by the candidate.",
+    "projects": "Extract the project names along with relevant information.",
+    "certifications": "Extract any certifications obtained by the candidate.",
+    "questions": [
+        "Can you tell me more about your experience at [Company] as a [Position]?",
+        "How did your education at [College] contribute to your skills in [Degree]?",
+        "What are some of the projects you worked on that showcase your skills in [skills]?",
+        "Could you elaborate on any certifications you have obtained in [certifications]?",
+        "What motivated you to pursue a career in [Position]? Tell me more about your introduction."
+    ]
+}
 
-        "questions": [
-            "Can you tell me more about your experience at [Company] as a [Position]?",
-            "How did your education at [College] contribute to your skills in [Degree]?",
-            "What are some of the projects you worked on that showcase your skills in [skills]?",
-            "Could you elaborate on any certifications you have obtained in [certifications]?",
-            "What motivated you to pursue a career in [Position]? Tell me more about your introduction."
-        ]
-    }
     """
 
     response = openai.completions.create(
@@ -79,62 +79,19 @@ def extract_information_ai(text):
 
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
-pdf_file = os.path.join(script_dir, "resume.pdf")
+pdf_file = os.path.join(script_dir, "resumee.pdf")
 
 resume_text = extract_text_from_pdf(pdf_file)
 
-extracted_info = extract_information_ai(resume_text)
-# extracted_info = {
-#         "personal_information": {
-#             "Name": "Sanket Sarwade",
-#             "Email": "sanketsarwade111@gmail.com",
-#             "Phone": "7798248452",
-#             "Address": "New Cidco, Nashik",
-#             "Date of Birth": "Jul 15, 2001",
-#             "LinkedIn": "https://github.com/sanketsarwade",
-#             "introduction": "As a highly motivated and detail-oriented data scientist, I am eager to begin my career in the eld of data science. With a solid foundation in statistics, programming, and machine learning techniques, I am well-equipped to tackle complex data problems and deliver meaningful insights. Through my academic and personal projects, I have honed my skills in data analysis, visualization, and modeling. I am procient in using tools such as Python, SQL, and Tableau, and have experience working with various data sources." 
-#         },
-#         "experience": {
-#             "Position": "Data Scientist",
-#             "Company": "Data Camp",
-#             "Start Date": "Oct 2022",
-#             "End Date": "Jan 2023"
-#         },
-#         "education": {
-#             "Degree": "Bsc Microbiology",
-#             "College": "Sinhgad College of Science",
-#             "Start Date": "Jun 2019",
-#             "End Date": "Sep 2022"
-#         },
-#         "skills": ["Python", "SQL", "Machine Learning", "Deep Learning", "Tableau", "Data Visualization", "Data Management", "Leadership", "Handling Pressure", "Collaboration"],     
-#         "projects": [
-#             {"name": "Human Activity Recognition", "description": "Worked on a project using Kaggle datasets to classify different human activities", "tools_used": ["Python", "Machine Learning"]},
-#             {"name": "Email Spam", "description": "Built a model to identify and filter out spam emails using machine learning algorithms", "tools_used": ["Python", "SQL"]},
-#             {"name": "Breast Cancer Prediction", "description": "Utilized data from a study to accurately predict the presence of breast cancer in patients", "tools_used": ["Python", "Tableau"]},
-#             {"name": "Anomaly Detection", "description": "Developed a system to identify and flag anomalous data points in a dataset", "tools_used": ["Python", "Machine Learning"]}, 
-#             {"name": "IPL Prediction", "description": "Collaborated with a team to predict the outcomes of IPL matches using historical data", "tools_used": ["Python", "Data Visualization"]}
-#         ],
-
-#         "certifications": ["Python", "Machine Learning", "Deep Learning", "SQL", "Data Science", "Tableau"],
-#         "questions": [
-#             "Can you tell me more about your experience at Data Camp as a Data Scientist?",
-#             "How did your education at Sinhgad College of Science contribute to your skills in Bsc Microbiology?",
-#             "What are some of the projects you worked on that showcase your skills in Python, SQL, and Machine Learning?",
-#             "Could you elaborate on any certifications you have obtained in Python, Machine Learning, and SQL?",
-#             "What motivated you to pursue a career in Data Science? Tell me more about your introduction."
-#         ]
-#     }
-
-# print(extracted_info)
-
-# Convert extracted information to JSON format
-# extracted_info_json = json.loads(extracted_info)
+extracted_info_json = extract_information_ai(resume_text)
+extracted_info = json.loads(extracted_info_json)
 job_role="Fullstack Developer"
 Company_name="Agilemorph Solutions"
 job_desc="We are looking for a passionate Python developer to join our team at Agilemorph Solutions.You will be responsible for developing and implementing high-quality software solutions, creating complex applications using cutting-edge programming features and frameworks and collaborating with other teams in the firm to define, design and ship new features.As an active part of our company, you will brainstorm and chalk out solutions to suit our requirements and meet our business goals. You will also be working on data engineering problems and building data pipelines. You would get ample opportunities to work on challenging and innovative projects, using the latest technologies and tools. If you enjoy working in a fast-paced and collaborative environment, we encourage you to apply for this exciting role. We offer industry-standard compensation packages, relocation assistance, and professional growth and development opportunities."
-
+Company_name = "Agilemorph Solutions"
 print("Extracted Information:",extracted_info)
-begin_sentence = f"Hello {extracted_info['personal_information']['Name']}, Welcome to the {Company_name} interview screening. I am here to assess your suitability for the {extracted_info['experience']['Position']} position."
+
+begin_sentence = f"Hello {extracted_info['personal_information']['Name']}, Welcome to the {Company_name} interview screening. I am here to assess your suitability for the role {extracted_info['experience']['Position']}."
 
 agent_prompt = f"As a professional interviewer call the callee by his/her name always, then first: Ask 5 questions from here: {extracted_info['questions']}, your responsibilities are multifaceted and candidate-centered. You aim to establish a positive and productive atmosphere with job applicants, evaluating their qualifications and fit for the position. Your role involves conducting thorough assessments of candidate skills and experiences, probing into their past work and achievements. Engage in active listening and thoughtful questioning to gain insights into their capabilities and potential contributions to the organization. Regular communication and feedback with candidates are essential for guiding them through the hiring process and providing clarity on expectations. Additionally, you adhere to all hiring protocols and maintain confidentiality throughout the selection process. Your goal is to ensure a fair and effective recruitment process that aligns with the company's goals and values. Communicate concisely and professionally. Aim for responses in clear and straightforward language, keeping exchanges focused and purposeful. This approach facilitates meaningful interactions and fosters a positive candidate experience. Your approach should be professional yet personable, demonstrating respect and empathy towards candidates while maintaining objectivity in your assessments. Strive to build rapport and trust with applicants, encouraging open communication and honest dialogue. It's important to provide constructive feedback and guidance, helping candidates understand areas for improvement and maximizing their potential for success. .".format(extracted_info, "{}")
 
