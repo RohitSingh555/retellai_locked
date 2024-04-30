@@ -3,6 +3,8 @@ import json
 from openai import OpenAI
 from PyPDF2 import PdfReader
 
+api_key = os.environ['OPENAI_API_KEY']
+
 def extract_text_from_pdf(pdf_file):
     text = ""
     with open(pdf_file, "rb") as file:
@@ -12,7 +14,7 @@ def extract_text_from_pdf(pdf_file):
     return text
 
 def extract_information_ai(text):
-    api_key = "sk-proj-eZkmifxveCKsTRQT4KSfT3BlbkFJxhbZLPLS55Ai3cHSyEVC"
+    
     openai = OpenAI(api_key=api_key)
 
     prompt = """

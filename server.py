@@ -23,13 +23,13 @@ retell = Retell(api_key=os.environ['RETELL_API_KEY'])
 twilio_client = TwilioClient()
 # twilio_client.create_phone_number(213, "68978b1c2935ff9c7d7107e61524d0bb")
 # twilio_client.delete_phone_number("+12133548310")
-# twilio_client.register_phone_agent("+12138982733", "7821e3d948db66925a676f78f555cfd1")
+twilio_client.register_phone_agent("+12138982733", "7821e3d948db66925a676f78f555cfd1")
 # twilio_client.create_phone_call("+12138982733", "+918668428101", "7821e3d948db66925a676f78f555cfd1")
 from_number="+12138982733"
 to_number="+918668428101"
 agent_id="7821e3d948db66925a676f78f555cfd1"
 # Only used for twilio phone call situations
-# @app.post("/twilio-voice-call/{agent_id_path}")
+@app.post("/twilio-voice-call/{agent_id_path}")
 def create_phone_call(from_number, to_number, agent_id):
     try:
         client = Client(os.environ['TWILIO_ACCOUNT_ID'], os.environ['TWILIO_AUTH_TOKEN'])
@@ -49,32 +49,35 @@ def create_phone_call(from_number, to_number, agent_id):
 
 @app.post("/twilio-voice-webhook/{agent_id_path}")
 async def handle_twilio_voice_webhook(request: Request, agent_id_path: str):
+    print("hi I am retell")
     try:
         # Check if it is machine
         post_data = await request.form()
-        if 'AnsweredBy' in post_data and post_data['AnsweredBy'] == "machine_start":
-            twilio_client.end_call(post_data['CallSid'])
-            return PlainTextResponse("")
+        # if 'AnsweredBy' in post_data and post_data['AnsweredBy'] == "machine_start":
+        #     twilio_client.end_call(post_data['CallSid'])
+        #     return PlainTextResponse("")
+        # elif 'AnsweredBy' in post_data:
+        #     return PlainTextResponse("")
 
-        call_response = twilio_client.retell.register_call(operations.RegisterCallRequestBody(
-            agent_id=agent_id_path, 
-            audio_websocket_protocol="twilio", 
-            audio_encoding="mulaw", 
-            sample_rate=8000
-        ))
-        if call_response.call_detail:
-            response = VoiceResponse()
-            start = response.connect()
-            start.stream(url=f"wss://api.retellai.com/audio-websocket/{call_response.call_detail.call_id}")
-            return PlainTextResponse(str(response), media_type='text/xml')
+        call_response: RegisterCallResponse = retell.call.register(
+            agent_id=agent_id_path,
+            audio_websocket_protocol="twilio",
+            audio_encoding="mulaw",
+            sample_rate=8000, # Sample rate has to be 8000 for Twilio
+            from_number=post_data['From'],
+            to_number=post_data['To'],
+            metadata={"twilio_call_sid": post_data['CallSid'],}
+        )
+        print(f"Call response: {call_response}")
+
+        response = VoiceResponse()
+        start = response.connect()
+        start.stream(url=f"wss://api.retellai.com/audio-websocket/{call_response.call_id}")
+        return PlainTextResponse(str(response), media_type='text/xml')
     except Exception as err:
         print(f"Error in twilio voice webhook: {err}")
         return JSONResponse(status_code=500, content={"message": "Internal Server Error"})
 
-
-# Only used for web frontend to register call so that frontend don't need api key
-@app.post("/register-call-on-your-server")
-async def handle_register_call(request: Request):
     try:
         post_data = await request.json()
         call_response = retell.call.register(

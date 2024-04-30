@@ -18,7 +18,7 @@ def extract_text_from_pdf(pdf_file):
     return text
 
 def extract_information_ai(text):
-    # api_key = "sk-proj-eZkmifxveCKsTRQT4KSfT3BlbkFJxhbZLPLS55Ai3cHSyEVC"
+    
     openai = OpenAI(api_key=api_key)
 
     prompt = """
@@ -86,7 +86,6 @@ resume_text = extract_text_from_pdf(pdf_file)
 extracted_info_json = extract_information_ai(resume_text)
 extracted_info = json.loads(extracted_info_json)
 job_role="Fullstack Developer"
-Company_name="Agilemorph Solutions"
 job_desc="We are looking for a passionate Python developer to join our team at Agilemorph Solutions.You will be responsible for developing and implementing high-quality software solutions, creating complex applications using cutting-edge programming features and frameworks and collaborating with other teams in the firm to define, design and ship new features.As an active part of our company, you will brainstorm and chalk out solutions to suit our requirements and meet our business goals. You will also be working on data engineering problems and building data pipelines. You would get ample opportunities to work on challenging and innovative projects, using the latest technologies and tools. If you enjoy working in a fast-paced and collaborative environment, we encourage you to apply for this exciting role. We offer industry-standard compensation packages, relocation assistance, and professional growth and development opportunities."
 Company_name = "Agilemorph Solutions"
 print("Extracted Information:",extracted_info)
