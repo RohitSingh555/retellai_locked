@@ -23,7 +23,7 @@ retell = Retell(api_key=os.environ['RETELL_API_KEY'])
 twilio_client = TwilioClient()
 # twilio_client.create_phone_number(213, "68978b1c2935ff9c7d7107e61524d0bb")
 # twilio_client.delete_phone_number("+12133548310")
-twilio_client.register_phone_agent("+12138982733", "7821e3d948db66925a676f78f555cfd1")
+# twilio_client.register_phone_agent("+12138982733", "7821e3d948db66925a676f78f555cfd1")
 # twilio_client.create_phone_call("+12138982733", "+918668428101", "7821e3d948db66925a676f78f555cfd1")
 from_number="+12138982733"
 to_number="+918668428101"
