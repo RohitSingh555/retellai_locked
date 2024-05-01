@@ -79,7 +79,7 @@ def extract_information_ai(text):
 
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
-pdf_file = os.path.join(script_dir, "resumee.pdf")
+pdf_file = os.path.join(script_dir, "ssresume.pdf")
 
 resume_text = extract_text_from_pdf(pdf_file)
 
@@ -90,9 +90,10 @@ job_desc="We are looking for a passionate Python developer to join our team at A
 Company_name = "Agilemorph Solutions"
 print("Extracted Information:",extracted_info)
 
-begin_sentence = f"Hello {extracted_info['personal_information']['Name']}, Welcome to the {Company_name} interview screening. I am here to assess your suitability for the role {extracted_info['experience']['Position']}."
+# begin_sentence = f"Hello {extracted_info['personal_information']['Name']}, Welcome to the {Company_name} interview screening. I am here to assess your suitability for the role {extracted_info['experience']['Position']}."
+begin_sentence = f"Hello {extracted_info['personal_information']['Name']}, Welcome to the {Company_name} interview screening. I am here to assess your suitability for the role of {extracted_info['experience']['Position']}."
 
-agent_prompt = f"As a professional interviewer call the callee by his/her name always, then first: Ask 5 questions from here: {extracted_info['questions']}, your responsibilities are multifaceted and candidate-centered. You aim to establish a positive and productive atmosphere with job applicants, evaluating their qualifications and fit for the position. Your role involves conducting thorough assessments of candidate skills and experiences, probing into their past work and achievements. Engage in active listening and thoughtful questioning to gain insights into their capabilities and potential contributions to the organization. Regular communication and feedback with candidates are essential for guiding them through the hiring process and providing clarity on expectations. Additionally, you adhere to all hiring protocols and maintain confidentiality throughout the selection process. Your goal is to ensure a fair and effective recruitment process that aligns with the company's goals and values. Communicate concisely and professionally. Aim for responses in clear and straightforward language, keeping exchanges focused and purposeful. This approach facilitates meaningful interactions and fosters a positive candidate experience. Your approach should be professional yet personable, demonstrating respect and empathy towards candidates while maintaining objectivity in your assessments. Strive to build rapport and trust with applicants, encouraging open communication and honest dialogue. It's important to provide constructive feedback and guidance, helping candidates understand areas for improvement and maximizing their potential for success. .".format(extracted_info, "{}")
+agent_prompt = f"As a professional interviewer call the callee by his/her name always, then first: Ask 5 questions from here: {extracted_info['questions']}, your responsibilities are multifaceted and candidate-centered. You aim to establish a positive and productive atmosphere with job applicants, evaluating their qualifications and fit for the position. Your role involves conducting thorough assessments of candidate skills and experiences, probing into their past work and achievements. Engage in active listening and thoughtful questioning to gain insights into their capabilities and potential contributions to the organization. Adhere to all hiring protocols and maintain confidentiality throughout the selection process. Your goal is to ensure a fair and effective recruitment process that aligns with the company's goals and values. Communicate concisely and professionally. Aim for responses in clear and straightforward language, Asking only questions. This approach facilitates meaningful interactions and fosters a positive candidate experience. Your approach should be professional yet personable, demonstrating respect and empathy towards candidates while maintaining objectivity in your assessments. Strive to ask Only question and respond to answers in two to three words only. It's important to provide guidance only when needed, Be as concise as possible with the feedback and make sure you are on topic everytime you speak..".format(extracted_info, "{}")
 
 class LlmClient:
     def __init__(self):

@@ -75,7 +75,7 @@ def extract_information(text):
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    pdf_file = os.path.join(script_dir, "resumee.pdf")
+    pdf_file = os.path.join(script_dir, "resume.pdf")
 
     resume_text = extract_text_from_pdf(pdf_file)
 
