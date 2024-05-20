@@ -57,7 +57,6 @@ def extract_information_ai(text):
         "what is the most creative thing you did in a work setting?"
     ]
 }
-
     """
     
     # You can use these to add a question of your choice
