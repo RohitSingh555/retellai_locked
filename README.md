@@ -44,17 +44,19 @@ To ues these features, follow these steps:
 
 1. Make sure twilio_client is initialized and `/twilio-voice-webhook/(agent_id_path)` is in `server.py` file to set up Twilio voice webhook. What this does is that every time a number of yours in Twilio get called, it would call this webhook which internally calls the `register-call` API and sends the correct audio websocket address back to Twilio, so it can connects with Retell to start the call.
 2. Put your ngrok ip address into `.env`, it would be something like `https://dc14-2601-645-c57f-8670-9986-5662-2c9a-adbd.ngrok-free.app`.
-3. (optional) Call `create_phone_number` to get a new number and associate with an agent id. This phone number now can handle inbound calls as long as this server is running.
-4. (optional) Call `register_phone_agent` to register your Twilio number and associate with an agent id. This phone number now can handle inbound calls as long as this server is running.
-5. (optional) Call `delete_phone_number` to release a number from your Twilio pool.
-6. (optional) Call `transfer_call` to transfer this on-going call to a destination number.
-7. (optional) Call `end_call` to end this on-going call.
-8. Call `create_phone_call` to start a call with caller & callee number, and your agent Id. This call would use the agent id supplied, and ignore the agent id you set up in step 3 or 4. It automatically hang up if machine/voicemail/IVR is detected. To turn it off, remove "machineDetection, asyncAmd" params.
+3. Now you can call from the retellai UI webcall will be placed
+4. If you want to analyse resume and their transcripts just change the file names in Transcriptparser.py file and run it
 
-## Run in prod
+   ```
+   python Transcriptparser.py
+   ```
 
-To run in prod, you probably want to customize your LLM solution, host the code
-in a cloud, and use that IP to create agent.
+   (make sure you are in the right folder directory)
+5. for running chatbot first run trst.py then run chatbot.py make sure you have chroma db server running before running this file
+
+   ```
+   chroma run --host localhost --port 8000 --path ../vectordb-stores/chromadb
+   ```
 
 ## **Use this link and learn from a YouTube Video**
 
