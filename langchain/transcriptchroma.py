@@ -1,12 +1,16 @@
 import os
 import json
+import boto3
+from bs4 import BeautifulSoup
 import chromadb
 import ollama
-import pdfplumber
-from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
 load_dotenv()
+
+s3 = boto3.client('s3', region_name='us-east-1')
+bucket_name = 'sample-candidates-pluto-dev'
+prefix = 'user_data/'
 
 def initialize_chromadb():
     try:
@@ -17,44 +21,76 @@ def initialize_chromadb():
         print(f"Failed to initialize ChromaDB connection: {e}")
         return None
 
-def parse_pdf(file_path):
-    with pdfplumber.open(file_path) as pdf:
-        text = ""
-        for page in pdf.pages:
-            text += page.extract_text()
-    return text
+def fetch_data_from_s3(bucket_name, prefix):
+    file_keys = []
+    continuation_token = None
 
-def extract_resume_data(resume_text):
-    # Simplified example for extracting resume data. Adjust with actual parsing logic.
-    location = "Location: Example"  # Extract location from resume_text
-    experience = "Experience: Example"  # Extract experience from resume_text
-    skills = "Skills: Example"  # Extract skills from resume_text
-    certificates = "Certificates: Example"  # Extract certificates from resume_text
-    
-    resume_data = {
-        "location": location,
-        "experience": experience,
-        "skills": skills,
-        "certificates": certificates
-    }
-    
-    return resume_data
+    while True:
+        try:
+            if continuation_token:
+                response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix, ContinuationToken=continuation_token)
+            else:
+                response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+            
+            if 'Contents' not in response:
+                break
+            
+            file_keys.extend([obj['Key'] for obj in response['Contents'] if obj['Key'].endswith('.json')])
+            
+            if response.get('IsTruncated'):
+                continuation_token = response['NextContinuationToken']
+            else:
+                break
+        except Exception as e:
+            print(f"Failed to list objects in S3: {e}")
+            break
 
-def document_exists(collection, doc_id):
+    return file_keys
+
+def extract_and_store_data(file_key, bucket_name, collection_name):
     try:
-        doc = collection.get(doc_id)
-        return doc is not None
-    except chromadb.exceptions.DocumentNotFound:
-        return False
-    except Exception as e:
-        print(f"Error checking existence of document '{doc_id}': {e}")
-        return False
+        local_filename = file_key.split('/')[-1]
+        s3.download_file(bucket_name, file_key, local_filename)
+        
+        with open(local_filename, 'r', encoding='utf-8') as f:
+            json_data = json.load(f)
+        
+        if 'summary' not in json_data:
+            print(f"Missing 'summary' key in {file_key}. Skipping this file.")
+            os.remove(local_filename)
+            return
+        
+        modified_data = {
+            "summary": json_data["summary"],
+            "strengths": json_data["strengths"],
+            "weaknesses": json_data["weaknesses"],
+            "cultural_fit": json_data["cultural_fit"],
+            "decision": json_data["decision"]
+        }
 
-def store_resume_and_transcript_data_in_chroma(resume_data, transcript_text, doc_id, collection_name, embedmodel='nomic-embed-text'):
+        store_json_data_in_chroma(modified_data, collection_name)
+        
+        print(f"Stored data from {file_key} in ChromaDB")
+        
+        os.remove(local_filename)
+        
+    except Exception as e:
+        print(f"Error processing file {file_key}: {e}")
+
+def convert_metadata(metadata):
+    converted_metadata = {}
+    for key, value in metadata.items():
+        if isinstance(value, list):
+            converted_metadata[key] = ', '.join(value)
+        else:
+            converted_metadata[key] = str(value)
+    return converted_metadata
+
+def store_json_data_in_chroma(json_data, collection_name, embedmodel='nomic-embed-text'):
     chroma = initialize_chromadb()
     if not chroma:
         return
-
+    
     try:
         collection = chroma.get_or_create_collection(collection_name)
         print(f"Collection '{collection_name}' accessed or created successfully.")
@@ -63,46 +99,41 @@ def store_resume_and_transcript_data_in_chroma(resume_data, transcript_text, doc
         return
 
     try:
-        if document_exists(collection, doc_id):
-            print(f"Document '{doc_id}' already exists. Skipping.")
-            return
-        
-        response = ollama.embeddings(model=embedmodel, prompt=f"Resume data: {json.dumps(resume_data)}")
-        resume_embeddings = response["embedding"]
-        
-        transcript_embeddings = ollama.embeddings(model=embedmodel, prompt=f"Transcript data: {transcript_text}")["embedding"]
-        
+        text_content = json_data['summary']
+        metadata = {
+            "strengths": json_data["strengths"],
+            "weaknesses": json_data["weaknesses"],
+            "cultural_fit": json_data["cultural_fit"],
+            "decision": json_data["decision"]
+        }
+
+        metadata = convert_metadata(metadata)
+
+        response = ollama.embeddings(model=embedmodel, prompt=f"Product data: {text_content}")
+        embeddings = response["embedding"]
+
         collection.add(
-            ids=[f"{doc_id}_resume", f"{doc_id}_transcript"],
-            documents=[json.dumps(resume_data), transcript_text],
-            embeddings=[resume_embeddings, transcript_embeddings],
-            metadatas=[{"type": "resume"}, {"type": "transcript"}]
+            ids=['example_id'],
+            documents=[text_content],
+            embeddings=[embeddings],
+            metadatas=[metadata]
         )
         
-        print(f"Data for document ID '{doc_id}' stored successfully with embeddings and metadata.")
+        print(f"Data stored successfully in ChromaDB with embeddings and metadata.")
+
     except Exception as e:
-        print(f"Error storing data for document ID '{doc_id}': {e}")
+        print(f"Error storing data in ChromaDB: {e}")
 
 def main():
-    resumes_dir = "../transcripts/"
-    transcripts_dir = "../transcripts/"
-    collection_name = "resume_transcript_data"
+    collection_name = "sample_candidates_pluto_data"
 
-    resumes = [f for f in os.listdir(resumes_dir) if f.endswith('.pdf')]
-    transcripts = [f for f in os.listdir(transcripts_dir) if f.endswith('.pdf')]
+    file_keys = fetch_data_from_s3(bucket_name, prefix)
+    if not file_keys:
+        print(f"No files found in S3 bucket {bucket_name}/{prefix}")
+        return
 
-    for resume_file in resumes:
-        resume_number = ''.join(filter(str.isdigit, resume_file))
-        related_transcript = next((t for t in transcripts if resume_number in t), None)
-        
-        if related_transcript:
-            resume_text = parse_pdf(os.path.join(resumes_dir, resume_file))
-            transcript_text = parse_pdf(os.path.join(transcripts_dir, related_transcript))
-            
-            resume_data = extract_resume_data(resume_text)
-            doc_id = f"resume_{resume_number}"
-            
-            store_resume_and_transcript_data_in_chroma(resume_data, transcript_text, doc_id, collection_name)
+    for file_key in file_keys:
+        extract_and_store_data(file_key, bucket_name, collection_name)
 
 if __name__ == "__main__":
     main()

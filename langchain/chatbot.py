@@ -46,7 +46,7 @@ def chatbot(collection_name):
     
     while True:
         user_input = input("You: ").strip().lower()
-
+        print("/n")
         if user_input in ["exit", "quit", "bye"]:
             print("Chatbot: Goodbye!")
             break
@@ -69,7 +69,7 @@ def chatbot(collection_name):
 
         if document:
             chat_history.add_message("system", f"Here is the information I found: {document}")
-            model_query = f"{chat_history.get_prompt()} Answer the last question using the following text as a resource and make sure that you provide details like a product seller. Keep your responses on point and within 30 words.\n: {document}"
+            model_query = f"{chat_history.get_prompt()} Answer the last question using the following text as a resource and make sure that you provide details. Keep your responses on point and within 100 words.\n: {document}"
             stream = ollama.generate(model='llama3', prompt=model_query, stream=True)
             response_text = ""
             for chunk in stream:
@@ -83,7 +83,7 @@ def chatbot(collection_name):
 
 # Main function
 def main():
-    collection_name = "jeffreestar1"
+    collection_name = "sample_candidates_pluto_data"
     chatbot(collection_name)
 
 if __name__ == "__main__":
