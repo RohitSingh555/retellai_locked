@@ -37,8 +37,57 @@ def setup_model():
     )
 
     human_message = '''
+    <Role>
+    You are an AI assistant trained to evaluate job candidates based on their resume and interview transcript.
+    <Role>
     
+    <Instructions>
+    Your job is to assess a candidate based on their transcript and resume. 
+    Your goal is to determine whether this candidate is a good fit for the Senior Data Scientist role at Moderna. 
+    Answer the questions below according to the candidate’s transcript and the resume and return a JSON response.
+    Use the job description and company background to guide your responses. Return a JSON response and only a JSON response. 
+    The JSON response should include the following keys: summary, strengths, weaknesses, cultural_fit, acceptance.
+    </Instructions>
+
+    <Questions>
+    1. Provide a brief summary of the candidate.
+    2. What are the strengths of the candidate?
+    3. What are the weaknesses of the candidate?
+    4. Describe the cultural fit of the candidate. In other words, how does the candidate’s skills and ideals align with the company’s values?
+    5. Use all the information provided about the candidate to explain why the candidate should be accepted or rejected from the role.
+    </Questions>
+
+    <ResponseFormat>
+    {format_instructions}
+    </ResponseFormat>
+
+    <Job Description>
+    {job_description}
+    </Job Description>
+
+    <Company Background>
+    {company_background}
+    </Company Background>
+
+    <Content>
+    {content}
+    </Content>
+
+    Json Response:
+
     '''
+
+    parser = PydanticOutputParser(pydantic_object=ResumeAnalysis)
+
+    prompt = PromptTemplate(
+        template = human_message,
+        input_variables = ["job_description", "company_background", "content"],
+        partial_variables = {"format_instructions": parser.get_format_instructions()}
+    )
+
+    chain = prompt | llm | parser
+
+    return chain
 
 
 def process_files_in_folder(folder_path, output_folder, job_description, company_background):
@@ -55,58 +104,16 @@ def process_files_in_folder(folder_path, output_folder, job_description, company
             file_path = os.path.join(folder_path, filename)
             content = read_docx(file_path)
 
-            # parser = PydanticOutputParser(pydantic_object=ResumeAnalysis)
-
-            prompt = f'''
-<Instructions>
-Your job is to assess a candidate based on their transcript and resume. 
-Your goal is to determine whether this candidate is a good fit for the Senior Data Scientist role at Moderna. 
-Answer the questions below according to the candidate’s transcript and the resume and return a JSON response.
-Use the job description and company background to guide your responses. Return a JSON response and only a JSON response. 
-The JSON response should include the following keys: summary, strengths, weaknesses, cultural fit, acceptance.
-</Instructions>
-
-<Questions>
-1. Provide a brief summary of the candidate.
-2. What are the strengths of the candidate?
-3. What are the weaknesses of the candidate?
-4. Describe the cultural fit of the candidate. In other words, how does the candidate’s skills and ideals align with the company’s values?
-5. Use all the information provided about the candidate to explain why the candidate should be accepted or rejected from the role.
-</Questions>
-
-<Job Description>
-{job_description}
-</Job Description>
-
-<Company Background>
-{company_background}
-</Company Background>
-
-<Content>
-{content}
-</Content>
-
-Json Response:
-'''
-# <ResponseFormat>
-# {format_instructions}
-# </ResponseFormat>
-
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an AI assistant trained to evaluate job candidates based on their resume and interview transcript."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-
-            response_content = response.choices[0].message
-            content_part = response_content.content
+            chain = setup_model()
+            response = chain.invoke({"job_description": job_description, "company_background": company_background, "content": content})
+            response_parsed = json.loads(response.json())
 
             with open(output_filepath, 'w') as f:
-                f.write(content_part)
+                json.dump(response_parsed, f, indent=4)
+            print(response_parsed)
 
             print(f"Response saved to {output_filename}")
+
 
 job_description = "Senior Data Scientist at Moderna. This role involves developing and overseeing Immuno-Assay development, essential for Moderna's research and vaccine production efforts."
 company_background = "Moderna is a biotechnology company pioneering messenger RNA (mRNA) therapeutics and vaccines. We aim to transform how medicines are created and delivered, focusing on preventing and fighting diseases."
