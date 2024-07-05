@@ -3,10 +3,11 @@ import json
 from docx import Document
 import openai
 from openai import OpenAI
-# from langchain.output_parsers import PydanticOutputParser
-# from langchain_core.prompts import PromptTemplate
-# from langchain.chains import LLMChain
-# from langchain_core.pydantic_v1 import BaseModel, Field, validator
+from langchain_openai import ChatOpenAI
+from langchain.output_parsers import PydanticOutputParser
+from langchain_core.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from langchain_core.pydantic_v1 import BaseModel, Field, validator
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
@@ -19,12 +20,25 @@ def read_docx(file_path):
         full_text.append(para.text)
     return '\n'.join(full_text)
 
-# class ResumeAnalysis(BaseModel):
-#     summary: str = Field(description='return a string output that summarizes the candidate')
-#     strengths: str = Field(description='return a string output that answers the question in detail')
-#     weaknesses: str = Field(description='return a string output that answers the question in detail')
-#     cultural_fit: str = Field(description='return a string output that answers the question in detail')
-#     acceptance: str = Field(description='return a string output that answers the question in detail')
+class ResumeAnalysis(BaseModel):
+    summary: str = Field(description='return a string output that summarizes the candidate')
+    strengths: str = Field(description='return a string output that answers the question in detail')
+    weaknesses: str = Field(description='return a string output that answers the question in detail')
+    cultural_fit: str = Field(description='return a string output that answers the question in detail')
+    acceptance: str = Field(description='return a string output that answers the question in detail')
+
+def setup_model():
+    llm = ChatOpenAI(
+        model="gpt-4o",
+        temperature=0,
+        max_tokens=None,
+        timeout=None,
+        max_retries=2
+    )
+
+    human_message = '''
+    
+    '''
 
 
 def process_files_in_folder(folder_path, output_folder, job_description, company_background):
