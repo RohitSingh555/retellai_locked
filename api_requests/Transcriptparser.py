@@ -3,6 +3,12 @@ import json
 from docx import Document
 import openai
 from openai import OpenAI
+# from langchain.output_parsers import PydanticOutputParser
+# from langchain_core.prompts import PromptTemplate
+# from langchain.chains import LLMChain
+# from langchain_core.pydantic_v1 import BaseModel, Field, validator
+from dotenv import load_dotenv
+load_dotenv(override=True)
 
 client = OpenAI()
 
@@ -12,6 +18,14 @@ def read_docx(file_path):
     for para in doc.paragraphs:
         full_text.append(para.text)
     return '\n'.join(full_text)
+
+# class ResumeAnalysis(BaseModel):
+#     summary: str = Field(description='return a string output that summarizes the candidate')
+#     strengths: str = Field(description='return a string output that answers the question in detail')
+#     weaknesses: str = Field(description='return a string output that answers the question in detail')
+#     cultural_fit: str = Field(description='return a string output that answers the question in detail')
+#     acceptance: str = Field(description='return a string output that answers the question in detail')
+
 
 def process_files_in_folder(folder_path, output_folder, job_description, company_background):
     for filename in os.listdir(folder_path):
@@ -27,17 +41,23 @@ def process_files_in_folder(folder_path, output_folder, job_description, company
             file_path = os.path.join(folder_path, filename)
             content = read_docx(file_path)
 
+            # parser = PydanticOutputParser(pydantic_object=ResumeAnalysis)
+
             prompt = f'''
 <Instructions>
-Your job is to assess a candidate based on their transcript and resume. Your goal is to determine whether this candidate is a good fit for the Senior Data Scientist role at Moderna. Answer the questions below according to the candidate’s transcript and the resume. Use the job description and company background to guide your responses. Return a JSON response and only a JSON response. 
+Your job is to assess a candidate based on their transcript and resume. 
+Your goal is to determine whether this candidate is a good fit for the Senior Data Scientist role at Moderna. 
+Answer the questions below according to the candidate’s transcript and the resume and return a JSON response.
+Use the job description and company background to guide your responses. Return a JSON response and only a JSON response. 
+The JSON response should include the following keys: summary, strengths, weaknesses, cultural fit, acceptance.
 </Instructions>
 
 <Questions>
-Provide a brief summary of the candidate.
-What are the strengths of the candidate?
-What are the weaknesses of the candidate?
-Describe the cultural fit of the candidate. In other words, how does the candidate’s skills and ideals align with the company’s values?
-Use all the information provided about the candidate to explain why the candidate should be accepted or rejected from the role.
+1. Provide a brief summary of the candidate.
+2. What are the strengths of the candidate?
+3. What are the weaknesses of the candidate?
+4. Describe the cultural fit of the candidate. In other words, how does the candidate’s skills and ideals align with the company’s values?
+5. Use all the information provided about the candidate to explain why the candidate should be accepted or rejected from the role.
 </Questions>
 
 <Job Description>
@@ -51,7 +71,12 @@ Use all the information provided about the candidate to explain why the candidat
 <Content>
 {content}
 </Content>
+
+Json Response:
 '''
+# <ResponseFormat>
+# {format_instructions}
+# </ResponseFormat>
 
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
