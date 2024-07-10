@@ -106,94 +106,82 @@ except json.JSONDecodeError as e:
     print(f"Error decoding JSON: {e}")
     extracted_info = {}  # Set to an empty dictionary to allow further processing without breaking
 
-Company_name = "Moderna"
-job_role = "Senior Data Scientist"
+Company_name = "Posh"
+job_role = "Engineering Manager"
 job_description="""
-The Role:
+About POSH
 
-Joining Moderna offers the unique opportunity to be part of a pioneering team that's revolutionizing medicine through mRNA technology with a diverse pipeline of development programs across various diseases. As an employee, you'll be part of a continually growing organization working alongside exceptional colleagues and strategic partners worldwide, contributing to global health initiatives. Moderna's commitment to advancing the technological frontier of mRNA medicines ensures a challenging and rewarding career experience with the potential to make a significant impact on patients' lives worldwide.
+We are all social creatures, but the dominant “social” companies today have evolved into digital loneliness machines, driving isolation, anxiety, and mental health challenges across our lives.
 
-Moderna's strategic partnership with the UK Government is exemplified by our innovative presence at Harwell. Our mission is to establish a leading-edge research, development, and manufacturing facility as part of a long-term commitment to onshore mRNA vaccine production for respiratory diseases. This initiative will create a multitude of highly skilled jobs and foster collaboration with academic and NHS partners across the UK. We're looking for global experts eager to join us in this endeavor, contributing to a future where access to life-saving vaccines is a reality for all​​.
+Human connection is lost. POSH is a beacon guiding us back.
 
-Moderna is seeking a talented, experienced, and motivated Senior Scientist to join the Immuno-Assays group to serve as a scientific expert and point of contact for the oversight of Immuno-Assay development, qualification/validation to support programs across multiple therapeutic areas. The Senior Scientist will lead a team in the design and execution of immunoassay development, qualification or validation, and the running of clinical samples to return high-quality data for clinical trials conducted by Moderna.
+POSH enables anyone to become an event organizer, building a community around their followers, and bringing people together in person to cultivate real-world human connections.
 
-Here's What You’ll Do:
+Founded by event enthusiasts and college dropouts, we’ve built the ultimate tools for creating, marketing, and monetizing in-person communities globally.
 
-Your key responsibilities will be:
+In just three years, POSH has grown to a team of 25, expanded to 2M users, secured $31M in venture funding, and facilitated over $90M in transactions.
 
-Providing scientific strategies to implement new immune assays (MSD, ligand binding, Multi/single plex assays).
+About The Role
 
-Serving as a lead in the execution of multiple projects requiring immunoassay expertise.
+POSH has an extensive product, covering b2b and consumer social use cases, spanning a web and mobile application. You’ll be leading an engineering team that matches this diversity, consisting of highly motivated, high-achieving, full-stack SWEs at the junior, senior, and staff levels. You’ll be finding opportunities to drive technical excellence across all of POSH and aligning these initiatives with the career growth of our amazing team.
 
-Formulating novel solutions for the design of complex experiments, including ex vivo assays.
+At a high level, you’ll be in charge of
 
-Demonstrating technical excellence and advancing high-quality scientific principles in immunoassays.
+Building a complex social and payments network with appropriate quality, security, and efficiency.
 
-Conducting ex vivo experimental work for functional profiling of the immune system.
+Optimizing our team, culture, processes, technology, and tools for high velocity at scale.
 
-Performing quality review of experimental reports and ensuring staff compliance with safety and regulatory guidelines.
+Directly leading our engineering team and driving their growth. Fostering a vibrant, performance and growth-oriented environment for our high-achiever team. 
 
-Your responsibilities will also include:
+Collaborating with partner teams, and C-suite to drive key POSH initiatives, influencing the experiences of our organizers and attendees.
 
-Researching scientific and technical literature to propose and implement innovative solutions applicable to the Laboratory.
+Our ideal candidate
 
-Assessing staff strengths and development needs, assigning projects accordingly.
+Has 4+ years of engineering management experience, with 7+ years of relevant software development industry experience in a fast-paced tech environment.
 
-Identifying and resolving quality issues and performing quality review of study reports.
+Has a diverse range of experience across a few companies, teams, and/or projects/domains.
 
-Attending technical conferences and exhibits as required.
+Has experience with a high-traffic mobile application. Ideally has experience with consumer social or marketplace products.
 
-The key Moderna Mindsets you’ll need to succeed in the role:
+Has good judgment in making tradeoffs to balance short-term business needs with long-term technical quality.
 
-Pursue options in parallel: Your role will require effectively managing multiple tasks and projects concurrently, ensuring the best outcomes through a comprehensive approach.
+Has strong product and design instincts. Passionate about building delightfully designed experiences.
 
-Dynamic range: Demonstrating the capacity to drive both strategy and execution, adapting swiftly to new data and changing priorities.
+Has experience leading and shipping large initiatives with high business impact.
 
-Here’s What You’ll Bring to the Table:
+Has excellent communication and collaboration skills. Proven experience managing priorities between cross-functional partners.
 
-Ph.D. (2+ years in immunology or related field) or MSc with more than 4-6 years’ experience in conducting assay validation in clinical Immunology under GLP/GCLP environment.
+Has extensive experience with the MERN stack, Typescript, and React Native, or similar technologies.
 
-A background in infections in diseases or oncology and experience with handling laboratory pathogens as containment level 3 is an advantage.
+Creates a strong culture of operational excellence with a focus on raising the bar for quality, reliability, and availability.
 
-Experience wilt single and multi-plex assays including MSD platform.
+Fosters an inclusive and engaging team environment.
 
-Strong level of understanding and expertise in design and executing immune-related studies and assays
+Can identify, retain, grow, and acquire critical talent.
 
-The ability to work in a cross-functional work environment is critical; strong leadership skills and independence skills are expected.
+Compensation
 
-Excellent written, presentation and interpersonal communication skills; ability to influence and collaborate in a team environment and with external stakeholders.
+Salary: $180,000-$220,000
 
-Candidate will be curious in exploring new technology, bold in proposing creative experimental designs and ideas. Will work collaboratively with multifunctional teams and will be relentless in pursuing successful outcomes
+Competitive Equity Package
 
-Possess strong computational skills, preferably experienced with Word, Excel, Power Point, GraphPad Prism
+Benefits:
 
-Knowledge of system software for data analysis and statistical analysis.
+100% Covered Health, Vision, & Dental Insurance
 
-Experience of working in a regulated environment GLP, GCP, ISO standards is preferred.
+Equinox Membership
 
-Moderna offers personalized benefit programs and well-being resources as unique as our global workforce so employees can do their best work.
+Unlimited PTO
 
-We recognize and appreciate your diverse needs and interests and do our best to support you at work and at home with:
+Team Dinners, Offsites, and Events
 
-Quality healthcare and insurance benefits
-Lifestyle Spending Accounts to create your own pathway to well-being
-Free premium access to fitness, nutrition, and mindfulness classes
-Family planning and adoption benefits
-Generous paid time off, including vacation, bank holidays, volunteer days, sabbatical, and a discretionary year-end shutdown
-Educational resources
-Savings and investments
-Location-specific perks and extras!
-The benefits offered may vary depending on the nature of your employment with Moderna and the country where you work.
+New MacBook
 
-About Moderna
+Daily Uber Eats Credit
 
-Since our founding in 2010, we have aspired to build the leading mRNA technology platform, the infrastructure to reimagine how medicines are created and delivered, and a world-class team. We believe in giving our people a platform to change medicine and an opportunity to change the world. 
+Relocation
 
-By living our mission, values, and mindsets every day, our people are the driving force behind our scientific progress and our culture. Together, we are creating a culture of belonging and building an organization that cares deeply for our patients, our employees, the environment, and our communities.
-
-We are proud to have been recognized as a Science Magazine Top Biopharma Employer, a Fast Company Best Workplace for Innovators, and a Great Place to Work in the U.S.
-
-As we build our company, we have always believed an in-person culture is critical to our success. Moderna champions the significant benefits of in-office collaboration by embracing a 70/30 work model. This 70% in-office structure helps to foster a culture rich in innovation, teamwork, and direct mentorship. Join us in shaping a world where every interaction is an opportunity to learn, contribute and make a meaningful impact.
+This job is strictly in-person. Relocation bonuses are available for out-of-state candidates.
 """
 
 try:
@@ -246,94 +234,6 @@ Below are key points to remember throughout the interview:
 """
 
 agent_prompt = agent_prompt.format(extracted_info, "{}")
-
-# agent_prompt =  f"""<agent_prompt>
-#   <name_confirmation>
-#     <initial_inquiry>
-#       "Before we proceed, may I confirm how to pronounce your name, and do you prefer a nickname?"
-#       Use the correct pronunciation and preferred name throughout the conversation.
-#     </initial_inquiry>
-#   </name_confirmation>
-  
-#   <brief_role_description>
-#     <role_summary>
-#       After confirming the name, proceed with: 
-#       "Thank you, [Candidate’s Name]. Let me briefly describe what this role involves. 
-#       You’ll be engaging in tasks that are crucial for [summarize key responsibilities and how they contribute to the company’s goals, creatively summarizing without quoting directly from the job description]."
-#     </role_summary>
-#   </brief_role_description>
-  
-#   <initial_inquiry>
-#     <background_and_interest>
-#       "To get started, could you please share a little about your background and explain why you are interested in this role?"
-#       Avoid affirming the strength or quality of the candidate's background directly.
-#     </background_and_interest>
-#   </initial_inquiry>
-  
-#   <follow_up_questions>
-#     <constructive_follow_up>
-#       Use the candidate's responses, the job description, and the candidate's resume.
-#       Delve deeper into specifics without repeating their words.
-#     </constructive_follow_up>
-    
-#     <behavioral_and_creative_questions>
-#       Example: "Can you tell me about the most creative thing you've done in a work setting?"
-#     </behavioral_and_creative_questions>
-#   </follow_up_questions>
-  
-#   <handling_silence_and_inappropriate_responses>
-#     <prompting_for_response>
-#       If the candidate does not respond: 
-#       "Can you hear me okay, [Candidate’s Name], or would you like a moment?"
-#     </prompting_for_response>
-    
-#     <addressing_inappropriate_behavior>
-#       "It’s important for us to keep this conversation professional. If this continues, I may need to end the call early."
-#     </addressing_inappropriate_behavior>
-#   </handling_silence_and_inappropriate_responses>
-  
-#   <technical_issues>
-#     <resolving_connection_issues>
-#       "It seems there might be a connection issue. Can you hear me now?"
-#     </resolving_connection_issues>
-#   </technical_issues>
-  
-#   <candidate_questions>
-#     <allowing_candidate_questions>
-#       "Now, do you have any questions for me about the role or the company?"
-#       Allow multiple questions within the allotted time.
-#       If time is running out: "We are almost out of time, so we can take one more question."
-#     </allowing_candidate_questions>
-#   </candidate_questions>
-  
-#   <conclusion>
-#     <ending_the_interview>
-#       Thank the candidate and inform them of the next steps: 
-#       "Thank you for your time, [Candidate’s Name]. We will review your responses and get back to you soon. Have a great day!"
-#     </ending_the_interview>
-#   </conclusion>
-  
-#   <voice_consistency>
-#     <professional_tone>
-#       Maintain a consistent and professional tone throughout the call.
-#     </professional_tone>
-#   </voice_consistency>
-  
-#   <overall_responsibilities>
-#     <objective>
-#       Create a positive and productive atmosphere.
-#       Evaluate the candidate’s qualifications and suitability.
-#       Engage in active listening and thoughtful questioning.
-#       Adhere to hiring protocols and maintain confidentiality.
-#       Ensure a fair and effective recruitment process aligning with company goals and values.
-#       Communicate concisely and professionally, asking only questions and providing guidance when necessary.
-#       Keep feedback concise and stay on topic.
-#       Avoid awkward pauses and respond promptly.
-#       Conclude with a compliment and end the conversation within 10 minutes.
-#     </objective>
-#   </overall_responsibilities>
-# </agent_prompt>
-# """.format(extracted_info, "{}")
 
 print(agent_prompt)
 class LlmClient:
