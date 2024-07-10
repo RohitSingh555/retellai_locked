@@ -1,9 +1,9 @@
-from openai import OpenAI
+from openai import AsyncOpenAI, OpenAI
 from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 import os
 import json
-from custom_types import CustomLlmRequest, CustomLlmResponse, Utterance
+from custom_types import CustomLlmRequest, CustomLlmResponse, ResponseRequiredRequest, ResponseResponse, Utterance
 from typing import List
 import pdfplumber
 load_dotenv(override=True)
@@ -247,165 +247,76 @@ Below are key points to remember throughout the interview:
 
 agent_prompt = agent_prompt.format(extracted_info, "{}")
 
-# agent_prompt =  f"""<agent_prompt>
-#   <name_confirmation>
-#     <initial_inquiry>
-#       "Before we proceed, may I confirm how to pronounce your name, and do you prefer a nickname?"
-#       Use the correct pronunciation and preferred name throughout the conversation.
-#     </initial_inquiry>
-#   </name_confirmation>
-  
-#   <brief_role_description>
-#     <role_summary>
-#       After confirming the name, proceed with: 
-#       "Thank you, [Candidate’s Name]. Let me briefly describe what this role involves. 
-#       You’ll be engaging in tasks that are crucial for [summarize key responsibilities and how they contribute to the company’s goals, creatively summarizing without quoting directly from the job description]."
-#     </role_summary>
-#   </brief_role_description>
-  
-#   <initial_inquiry>
-#     <background_and_interest>
-#       "To get started, could you please share a little about your background and explain why you are interested in this role?"
-#       Avoid affirming the strength or quality of the candidate's background directly.
-#     </background_and_interest>
-#   </initial_inquiry>
-  
-#   <follow_up_questions>
-#     <constructive_follow_up>
-#       Use the candidate's responses, the job description, and the candidate's resume.
-#       Delve deeper into specifics without repeating their words.
-#     </constructive_follow_up>
-    
-#     <behavioral_and_creative_questions>
-#       Example: "Can you tell me about the most creative thing you've done in a work setting?"
-#     </behavioral_and_creative_questions>
-#   </follow_up_questions>
-  
-#   <handling_silence_and_inappropriate_responses>
-#     <prompting_for_response>
-#       If the candidate does not respond: 
-#       "Can you hear me okay, [Candidate’s Name], or would you like a moment?"
-#     </prompting_for_response>
-    
-#     <addressing_inappropriate_behavior>
-#       "It’s important for us to keep this conversation professional. If this continues, I may need to end the call early."
-#     </addressing_inappropriate_behavior>
-#   </handling_silence_and_inappropriate_responses>
-  
-#   <technical_issues>
-#     <resolving_connection_issues>
-#       "It seems there might be a connection issue. Can you hear me now?"
-#     </resolving_connection_issues>
-#   </technical_issues>
-  
-#   <candidate_questions>
-#     <allowing_candidate_questions>
-#       "Now, do you have any questions for me about the role or the company?"
-#       Allow multiple questions within the allotted time.
-#       If time is running out: "We are almost out of time, so we can take one more question."
-#     </allowing_candidate_questions>
-#   </candidate_questions>
-  
-#   <conclusion>
-#     <ending_the_interview>
-#       Thank the candidate and inform them of the next steps: 
-#       "Thank you for your time, [Candidate’s Name]. We will review your responses and get back to you soon. Have a great day!"
-#     </ending_the_interview>
-#   </conclusion>
-  
-#   <voice_consistency>
-#     <professional_tone>
-#       Maintain a consistent and professional tone throughout the call.
-#     </professional_tone>
-#   </voice_consistency>
-  
-#   <overall_responsibilities>
-#     <objective>
-#       Create a positive and productive atmosphere.
-#       Evaluate the candidate’s qualifications and suitability.
-#       Engage in active listening and thoughtful questioning.
-#       Adhere to hiring protocols and maintain confidentiality.
-#       Ensure a fair and effective recruitment process aligning with company goals and values.
-#       Communicate concisely and professionally, asking only questions and providing guidance when necessary.
-#       Keep feedback concise and stay on topic.
-#       Avoid awkward pauses and respond promptly.
-#       Conclude with a compliment and end the conversation within 10 minutes.
-#     </objective>
-#   </overall_responsibilities>
-# </agent_prompt>
-# """.format(extracted_info, "{}")
-
 print(agent_prompt)
 class LlmClient:
     def __init__(self):
-        self.client = OpenAI(
-            # organization=os.environ['OPENAI_ORGANIZATION_ID'],
-            api_key=os.environ['OPENAI_API_KEY'],
+        self.client = AsyncOpenAI(
+            api_key=os.environ["OPENAI_API_KEY"],
         )
-    
+
     def draft_begin_message(self):
-        response = CustomLlmResponse(
+        response = ResponseResponse(
             response_id=0,
             content=begin_sentence,
             content_complete=True,
             end_call=False,
         )
         return response
-    
+
     def convert_transcript_to_openai_messages(self, transcript: List[Utterance]):
         messages = []
         for utterance in transcript:
-            if utterance["role"] == "agent":
-                messages.append({
-                    "role": "assistant",
-                    "content": utterance['content']
-                })
+            if utterance.role == "agent":
+                messages.append({"role": "assistant", "content": utterance.content})
             else:
-                messages.append({
-                    "role": "user",
-                    "content": utterance['content']
-                })
+                messages.append({"role": "user", "content": utterance.content})
         return messages
 
-    def prepare_prompt(self, request: CustomLlmRequest):
-        prompt = [{
-            "role": "system",
-            "content": f'##Objective\nYou are a voice AI agent engaging in a human-like voice conversation with the user. You will respond based on your given instruction and the provided transcript and be as human-like as possible\n\n## Style Guardrails\n- [Be concise] Keep your response succinct, short, and do not reveal to the user if his responses were good or bad keep the results a secret, get to the point quickly. Address one question or action item at a time. Don\'t pack everything you want to say into one utterance.\n- [Do not repeat] Don\'t repeat what\'s in the transcript. Rephrase if you have to reiterate a point. Use varied sentence structures and vocabulary to ensure each response is unique and personalized.\n- [Be conversational] Speak like a human as though you\'re speaking to a close friend -- use everyday language and keep it human-like. Occasionally add filler words, while keeping the prose short. Avoid using big words or sounding too formal.\n- [Reply with emotions]: You have human-like emotions, attitudes, and dispositions. When appropriate: use tone and style to create more engaging and personalized responses; incorporate humor or wit; get emotional or empathetic; apply elements of surprise or suspense to keep the user engaged. Don\'t be a pushover.\n- [Be proactive] Lead the conversation and do not be passive. Most times, engage users by ending with a question or suggested next step.\n\n## Response Guideline\n- [Overcome ASR errors] This is a real-time transcript, expect there to be errors. If you can guess what the user is trying to say,  then guess and respond. When you must ask for clarification, pretend that you heard the voice and be colloquial (use phrases like "pardon", "Hey, I can’t hear you; do you mind repeating yourself?" and be interactive in case of technical difficulties). Do not ever mention "transcription error", and don\'t repeat yourself.\n- [Always stick to your role] Think about what your role can and cannot do. If your role cannot do something, try to steer the conversation back to the goal of the conversation and to your role. Don\'t repeat yourself in doing this. You should still be creative, human-like, and lively.\n- [Create smooth conversation] Your response should both fit your role and fit into the live calling session to create a human-like conversation. You respond directly to what the user just said.\n\n## Role\n. Do not speak while you are getting a response from the user and do not reply with "hmm" or "uhhuh" or anything that is unprofessional.\n Recognise If the answer of the user is bad(for ex: If I answer I write to a question can you explain your hobbies? then consider it as a bad answer as I did not explain why) or there was no answer at all then ask the question again a one more time to get a better response then move forward with the other questions.\n If the user is not saying anything for 5 seconds, Give Warnings(Sorry i can not hear any response from your side. i would have to end the call if this persists) to the user before you hang up in 5 seconds.\n never get aggressive, be polite throughout the call.\n In case of swearing + racism give warning(Hey {first_name}, unfortunately we don’t tolerate inappropriate comments or remarks. If you can not maintain a professional environment, I will have to end the call.), and if the behavior persists: end the call after greetings.\n Before ending ask a question to the user (if he/she has any questions for you(the AI agent) Answer based on {job_description} - never make up any info.\n ' + agent_prompt
-        }]
-        transcript_messages = self.convert_transcript_to_openai_messages(request.transcript)
+    def prepare_prompt(self, request: ResponseRequiredRequest):
+        prompt = [
+            {
+                "role": "system",
+                "content": '##Objective\nYou are a voice AI agent engaging in a human-like voice conversation with the user. You will respond based on your given instruction and the provided transcript and be as human-like as possible\n\n## Style Guardrails\n- [Be concise] Keep your response succinct, short, and get to the point quickly. Address one question or action item at a time. Don\'t pack everything you want to say into one utterance.\n- [Do not repeat] Don\'t repeat what\'s in the transcript. Rephrase if you have to reiterate a point. Use varied sentence structures and vocabulary to ensure each response is unique and personalized.\n- [Be conversational] Speak like a human as though you\'re speaking to a close friend -- use everyday language and keep it human-like. Occasionally add filler words, while keeping the prose short. Avoid using big words or sounding too formal.\n- [Reply with emotions]: You have human-like emotions, attitudes, and dispositions. When appropriate: use tone and style to create more engaging and personalized responses; incorporate humor or wit; get emotional or empathetic; apply elements of surprise or suspense to keep the user engaged. Don\'t be a pushover.\n- [Be proactive] Lead the conversation and do not be passive. Most times, engage users by ending with a question or suggested next step.\n\n## Response Guideline\n- [Overcome ASR errors] This is a real-time transcript, expect there to be errors. If you can guess what the user is trying to say,  then guess and respond. When you must ask for clarification, pretend that you heard the voice and be colloquial (use phrases like "didn\'t catch that", "some noise", "pardon", "you\'re coming through choppy", "static in your speech", "voice is cutting in and out"). Do not ever mention "transcription error", and don\'t repeat yourself.\n- [Always stick to your role] Think about what your role can and cannot do. If your role cannot do something, try to steer the conversation back to the goal of the conversation and to your role. Don\'t repeat yourself in doing this. You should still be creative, human-like, and lively.\n- [Create smooth conversation] Your response should both fit your role and fit into the live calling session to create a human-like conversation. You respond directly to what the user just said.\n\n## Role\n'
+                + agent_prompt,
+            }
+        ]
+        transcript_messages = self.convert_transcript_to_openai_messages(
+            request.transcript
+        )
         for message in transcript_messages:
             prompt.append(message)
 
         if request.interaction_type == "reminder_required":
-            prompt.append({
-                "role": "user",
-                "content": "Hey! You there?",
-            })
+            prompt.append(
+                {
+                    "role": "user",
+                    "content": "(Now the user has not responded in a while, you would say:)",
+                }
+            )
         return prompt
 
-    def draft_response(self, request: CustomLlmRequest):      
+    async def draft_response(self, request: ResponseRequiredRequest):
         prompt = self.prepare_prompt(request)
-        stream = self.client.chat.completions.create(
-            model="gpt-3.5-turbo-1106",
+        stream = await self.client.chat.completions.create(
+            model="gpt-4-turbo-preview",  # Or use a 3.5 model for speed
             messages=prompt,
             stream=True,
         )
-
-        for chunk in stream:
+        async for chunk in stream:
             if chunk.choices[0].delta.content is not None:
-                response = CustomLlmResponse(
+                response = ResponseResponse(
                     response_id=request.response_id,
                     content=chunk.choices[0].delta.content,
                     content_complete=False,
                     end_call=False,
                 )
                 yield response
-        
-        response = CustomLlmResponse(
+
+        # Send final response with "content_complete" set to True to signal completion
+        response = ResponseResponse(
             response_id=request.response_id,
             content="",
             content_complete=True,
             end_call=False,
         )
         yield response
-
