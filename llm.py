@@ -108,6 +108,8 @@ except json.JSONDecodeError as e:
 
 Company_name = "Posh"
 job_role = "Engineering Manager"
+Company_name = "Posh"
+job_role = "Engineering Manager"
 job_description="""
 About The Role
 POSH has an extensive product, covering b2b and consumer social use cases, spanning a web and mobile application. You’ll be leading an engineering team that matches this diversity, consisting of highly motivated, high-achieving, full-stack SWEs at the junior, senior, and staff levels. You’ll be finding opportunities to drive technical excellence across all of POSH and aligning these initiatives with the career growth of our amazing team.
@@ -194,6 +196,7 @@ Below are key points to remember throughout the interview:
 """
 
 agent_prompt = agent_prompt.format(extracted_info, "{}")
+
 
 print(agent_prompt)
 class LlmClient:
