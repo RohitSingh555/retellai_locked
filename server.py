@@ -5,9 +5,12 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, PlainTextResponse
 from concurrent.futures import TimeoutError as ConnectionTimeoutError
+import requests
 from twilio.twiml.voice_response import VoiceResponse
 from retell import Retell
 from retell.resources.call import RegisterCallResponse
+from AWS.migrate_to_s3 import move_files_to_user_folders
+from api_requests.Transcriptparser import read_docx, setup_model
 from custom_types import (
     ConfigResponse,
     ResponseRequiredRequest,
@@ -197,3 +200,71 @@ async def websocket_handler(websocket: WebSocket, call_id: str):
         await websocket.close(1011, "Server error")
     finally:
         print(f"LLM WebSocket connection closed for {call_id}")
+        
+from api_requests.api_requests import get_call_details
+
+
+def process_files_in_folder(folder_path, output_folder, job_description, company_background):
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".docx"):
+            file_id = filename.split('_')[0]
+            output_filename = f'{file_id}_parsed_transcript.json'
+            output_filepath = os.path.join(output_folder, output_filename)
+            
+            if os.path.exists(output_filepath):
+                print(f"Skipping {filename} as {output_filename} already exists.")
+                continue
+            
+            file_path = os.path.join(folder_path, filename)
+            content = read_docx(file_path)
+
+            chain = setup_model()
+            response = chain.invoke({"job_description": job_description, "company_background": company_background, "content": content})
+            response_parsed = json.loads(response.json())
+
+            with open(output_filepath, 'w') as f:
+                json.dump(response_parsed, f, indent=4)
+            print(response_parsed)
+
+            print(f"Response saved to {output_filename}")
+
+@app.post("/get_transcript")
+async def get_transcript(request: Request):
+    data = await request.json()
+    # print(f"Received data: {data}")
+
+    call_id = data.get("call", {}).get("call_id")
+    print(f"Call ID: {call_id}")
+    if not call_id:
+        return JSONResponse(content={"error": "Call ID not found in the request data"}, status_code=400)
+    
+    token = os.getenv("RETELL_API_KEY")
+    if not token:
+        return JSONResponse(content={"error": "API token not found"}, status_code=500)
+    
+    try:
+        call_details = get_call_details(call_id, token)
+    except requests.RequestException as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+    print("")
+    print("")
+    print("")
+    print(call_details)
+    job_description = "Senior Data Scientist at Moderna. This role involves developing and overseeing Immuno-Assay development, essential for Moderna's research and vaccine production efforts."
+    company_background = "Moderna is a biotechnology company pioneering messenger RNA (mRNA) therapeutics and vaccines. We aim to transform how medicines are created and delivered, focusing on preventing and fighting diseases."
+    transcripts_folder = 'transcripts'
+    output_folder = transcripts_folder 
+
+    process_files_in_folder(output_folder, output_folder, job_description, company_background)
+    
+    bucket_name = 'sample-candidates-pluto-dev'
+
+    prefix = 'user_data/'
+
+    local_folder = 'transcripts/'
+    
+    move_files_to_user_folders(local_folder, bucket_name, prefix)
+
+    return JSONResponse(content={"message": "Data received and processed"})
+
+
