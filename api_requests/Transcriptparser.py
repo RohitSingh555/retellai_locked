@@ -11,7 +11,8 @@ from langchain_core.pydantic_v1 import BaseModel, Field, validator
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
-client = OpenAI()
+openai.api_key = os.getenv("OPENAI_ID")
+# client = OpenAI()
 
 def read_docx(file_path):
     doc = Document(file_path)
