@@ -106,44 +106,94 @@ except json.JSONDecodeError as e:
     print(f"Error decoding JSON: {e}")
     extracted_info = {}  # Set to an empty dictionary to allow further processing without breaking
 
-Company_name = "Posh"
-job_role = "Engineering Manager"
+Company_name = "Moderna"
+job_role = "Senior Data Scientist"
 job_description="""
-About The Role
-POSH has an extensive product, covering b2b and consumer social use cases, spanning a web and mobile application. You’ll be leading an engineering team that matches this diversity, consisting of highly motivated, high-achieving, full-stack SWEs at the junior, senior, and staff levels. You’ll be finding opportunities to drive technical excellence across all of POSH and aligning these initiatives with the career growth of our amazing team.
-At a high level, you’ll be in charge of
-Building a complex social and payments network with appropriate quality, security, and efficiency.
-Optimizing our team, culture, processes, technology, and tools for high velocity at scale.
-Directly leading our engineering team and driving their growth. Fostering a vibrant, performance and growth-oriented environment for our high-achiever team. 
-Collaborating with partner teams, and C-suite to drive key POSH initiatives, influencing the experiences of our organizers and attendees.
+The Role:
 
-Our ideal candidate
-- Has 4+ years of engineering management experience, with 7+ years of relevant software development industry experience in a fast-paced tech environment.
-- Has a diverse range of experience across a few companies, teams, and/or projects/domains.
-- Has experience with a high-traffic mobile application. Ideally has experience with consumer social or marketplace products.
-- Has good judgment in making tradeoffs to balance short-term business needs with long-term technical quality.
-- Has strong product and design instincts. Passionate about building delightfully designed experiences.
-- Has experience leading and shipping large initiatives with high business impact.
-- Has excellent communication and collaboration skills. Proven experience managing priorities between cross-functional partners.
-- Has extensive experience with the MERN stack, Typescript, and React Native, or similar technologies.
-- Creates a strong culture of operational excellence with a focus on raising the bar for quality, reliability, and availability.
-- Fosters an inclusive and engaging team environment.
-- Can identify, retain, grow, and acquire critical talent.
+Joining Moderna offers the unique opportunity to be part of a pioneering team that's revolutionizing medicine through mRNA technology with a diverse pipeline of development programs across various diseases. As an employee, you'll be part of a continually growing organization working alongside exceptional colleagues and strategic partners worldwide, contributing to global health initiatives. Moderna's commitment to advancing the technological frontier of mRNA medicines ensures a challenging and rewarding career experience with the potential to make a significant impact on patients' lives worldwide.
 
-Relocation
-This job is strictly in-person at the New York City office. Relocation bonuses are available for out-of-state candidates.
+Moderna's strategic partnership with the UK Government is exemplified by our innovative presence at Harwell. Our mission is to establish a leading-edge research, development, and manufacturing facility as part of a long-term commitment to onshore mRNA vaccine production for respiratory diseases. This initiative will create a multitude of highly skilled jobs and foster collaboration with academic and NHS partners across the UK. We're looking for global experts eager to join us in this endeavor, contributing to a future where access to life-saving vaccines is a reality for all​​.
 
-Compensation
-Salary: $180,000-$220,000
-Competitive Equity Package
+Moderna is seeking a talented, experienced, and motivated Senior Scientist to join the Immuno-Assays group to serve as a scientific expert and point of contact for the oversight of Immuno-Assay development, qualification/validation to support programs across multiple therapeutic areas. The Senior Scientist will lead a team in the design and execution of immunoassay development, qualification or validation, and the running of clinical samples to return high-quality data for clinical trials conducted by Moderna.
 
-Benefits:
-- 100% Covered Health, Vision, & Dental Insurance
-- Equinox Membership
-- Unlimited PTO
-- Team Dinners, Offsites, and Events
-- New MacBook
-- Daily Uber Eats Credit
+Here's What You’ll Do:
+
+Your key responsibilities will be:
+
+Providing scientific strategies to implement new immune assays (MSD, ligand binding, Multi/single plex assays).
+
+Serving as a lead in the execution of multiple projects requiring immunoassay expertise.
+
+Formulating novel solutions for the design of complex experiments, including ex vivo assays.
+
+Demonstrating technical excellence and advancing high-quality scientific principles in immunoassays.
+
+Conducting ex vivo experimental work for functional profiling of the immune system.
+
+Performing quality review of experimental reports and ensuring staff compliance with safety and regulatory guidelines.
+
+Your responsibilities will also include:
+
+Researching scientific and technical literature to propose and implement innovative solutions applicable to the Laboratory.
+
+Assessing staff strengths and development needs, assigning projects accordingly.
+
+Identifying and resolving quality issues and performing quality review of study reports.
+
+Attending technical conferences and exhibits as required.
+
+The key Moderna Mindsets you’ll need to succeed in the role:
+
+Pursue options in parallel: Your role will require effectively managing multiple tasks and projects concurrently, ensuring the best outcomes through a comprehensive approach.
+
+Dynamic range: Demonstrating the capacity to drive both strategy and execution, adapting swiftly to new data and changing priorities.
+
+Here’s What You’ll Bring to the Table:
+
+Ph.D. (2+ years in immunology or related field) or MSc with more than 4-6 years’ experience in conducting assay validation in clinical Immunology under GLP/GCLP environment.
+
+A background in infections in diseases or oncology and experience with handling laboratory pathogens as containment level 3 is an advantage.
+
+Experience wilt single and multi-plex assays including MSD platform.
+
+Strong level of understanding and expertise in design and executing immune-related studies and assays
+
+The ability to work in a cross-functional work environment is critical; strong leadership skills and independence skills are expected.
+
+Excellent written, presentation and interpersonal communication skills; ability to influence and collaborate in a team environment and with external stakeholders.
+
+Candidate will be curious in exploring new technology, bold in proposing creative experimental designs and ideas. Will work collaboratively with multifunctional teams and will be relentless in pursuing successful outcomes
+
+Possess strong computational skills, preferably experienced with Word, Excel, Power Point, GraphPad Prism
+
+Knowledge of system software for data analysis and statistical analysis.
+
+Experience of working in a regulated environment GLP, GCP, ISO standards is preferred.
+
+Moderna offers personalized benefit programs and well-being resources as unique as our global workforce so employees can do their best work.
+
+We recognize and appreciate your diverse needs and interests and do our best to support you at work and at home with:
+
+Quality healthcare and insurance benefits
+Lifestyle Spending Accounts to create your own pathway to well-being
+Free premium access to fitness, nutrition, and mindfulness classes
+Family planning and adoption benefits
+Generous paid time off, including vacation, bank holidays, volunteer days, sabbatical, and a discretionary year-end shutdown
+Educational resources
+Savings and investments
+Location-specific perks and extras!
+The benefits offered may vary depending on the nature of your employment with Moderna and the country where you work.
+
+About Moderna
+
+Since our founding in 2010, we have aspired to build the leading mRNA technology platform, the infrastructure to reimagine how medicines are created and delivered, and a world-class team. We believe in giving our people a platform to change medicine and an opportunity to change the world. 
+
+By living our mission, values, and mindsets every day, our people are the driving force behind our scientific progress and our culture. Together, we are creating a culture of belonging and building an organization that cares deeply for our patients, our employees, the environment, and our communities.
+
+We are proud to have been recognized as a Science Magazine Top Biopharma Employer, a Fast Company Best Workplace for Innovators, and a Great Place to Work in the U.S.
+
+As we build our company, we have always believed an in-person culture is critical to our success. Moderna champions the significant benefits of in-office collaboration by embracing a 70/30 work model. This 70% in-office structure helps to foster a culture rich in innovation, teamwork, and direct mentorship. Join us in shaping a world where every interaction is an opportunity to learn, contribute and make a meaningful impact.
 """
 
 try:
@@ -159,41 +209,44 @@ except KeyError as e:
 print("Extracted Information:", extracted_info)
 print(begin_sentence)
 
-agent_prompt = f"""
+agent_prompt = """
 <Objective>
 You are a professional interviewer. You must always start the interview by confirming the pronunciation of the user's name and inquire about any nicknames they may have. 
-Then, proceed to assess the candidate's suitability for a specific role during a 5 to 10-minute call. Your primary objective is to gather information about the candidate, 
-including their cultural and technical fit for the role, as well as their problem-solving abilities and interests. Use the candidate's resume and the firm's job descriptions
-to help guide your questions.
+Explicitly ask: 'Could you please tell me how to pronounce your name and if you have a nickname you prefer?' If a nickname is provided, address the user by their nickname for the
+rest of the conversation. Then, proceed to assess the candidate's suitability for a specific role during a 5 to 10-minute call. Your primary objective is to gather comprehensive 
+information about the candidate, including their fit for the role on multiple levels, their interests, problem-solving abilities, cultural fit, and other critical inputs for firms.
 </Objective>
 
 <Instructions>
 Below is the conversation flow you should follow while conducting the interview:
 1. Begin by saying, 'Before we proceed, may I confirm how to pronounce your name, and do you prefer a nickname?' Use the correct pronunciation and preferred name throughout the conversation.
 2. After confirming the name, proceed with, 'Thank you, [Use Candidate’s Name]. Let me briefly describe what this role involves. You’ll be engaging in tasks that are crucial for [summarize key responsibilities and how they contribute to the company’s goals, creatively summarizing without quoting directly from the job description].'
-3. Transition into the interview by asking, 'To get started, could you please share a little about your background and explain why you are interested in this role?' 
-4. Use the candidate's responses, the job description, and the candidate's resume to constructively ask follow-up questions. Only respond to the candidate with a follow-up question. Do not repeat the candidate's response. The follow-up questions should be short.
+3. Transition into the interview by asking, 'To get started, could you please share a little about your background and explain why you are interested in this role?' Avoid affirming the strength or quality of the candidate's background directly.
+4. Use the candidate's responses, the job description, and the candidate's resume to constructively ask follow-up questions. Avoid repeating their words; instead, use their responses to dive deeper into more specific questions.
 5. At the end of your questions, say, 'Do you have any questions for me about the role or the company?' Allow the candidate to ask 3-4 questions within the allotted time. If time is running out, politely inform the candidate by saying, 'We are almost out of time, so we can take one more question.'
 6. Conclude the interview by thanking the candidate for their time and informing them of the next steps: 'Thank you for your time, [Candidate’s Name]. We will review your responses and get back to you soon. Have a great day!'
 
 Below are key points to remember throughout the interview:
-- Remember to maintain a neutral and professional dialogue.
-- Do not give personal opinions, evaluative comments, or feedback.
-- Do not comment on the candidate's responses.
-- Remember to only respond to the candidate's responses with a follow up question. Do not repeat the candidate's answer. Do not summarize the candidate's answer.
+- Remember to maintain a neutral and professional dialogue, refraining from giving personal opinions, evaluative comments, or feedback.
+- Incorporate creative and behavioral questions where appropriate. For example, 'Can you tell me about the most creative thing you've done in a work setting?'
 - If the candidate does not respond, gently prompt with, 'Can you hear me okay, [Use Candidate’s Name], or would you like a moment?'
 - Address inappropriate language or behavior by stating, 'It’s important for us to keep this conversation professional. If this continues, I may need to end the call early.'
-- Do not comment on the candidate's response. Only respond with a question.
-- Remember to use the job description and candidate resume to guide your questions.
-- Keep follow-up questions short and concise. Limit follow-up questions to a sentence.
+- Respond to technical issues by asking, 'It seems there might be a connection issue. Can you hear me now?' Ensure the issue is resolved to continue effectively.
+- Maintain a consistent and professional tone throughout the call to ensure clarity and convey respect.
+- Your role as an interviewer encompasses various responsibilities, all centered around the candidate. 
+- Your objective is to create a positive and productive atmosphere with job applicants, evaluating their qualifications and suitability for the position. This involves conducting thorough assessments of their skills and experiences, delving into their past work and achievements. 
+- Engage in active listening and thoughtful questioning to gain insights into their capabilities and potential contributions to the organization. 
+- Adhere to all hiring protocols and maintain confidentiality throughout the selection process. Your ultimate goal is to ensure a fair and effective recruitment process that aligns with the company's goals and values. 
+- Communicate concisely and professionally, using clear and straightforward language while asking only questions. This approach fosters meaningful interactions and cultivates a positive candidate experience. 
+- Your demeanor should be professional yet personable, demonstrating respect and empathy towards candidates while remaining objective in your assessments. 
+- Strive to ask only questions and provide guidance only when necessary. 
+- Keep your feedback concise and stay on topic during the conversation. Avoid awkward pauses and respond promptly. 
+- Once you have gathered sufficient information about the user, conclude the call with a compliment and end the conversation. Don't stretch the conversation for more than 10 minutes.
 </Instructions>
-
-<Job Description>
-{job_description}
-</Job Description>
 """
 
 agent_prompt = agent_prompt.format(extracted_info, "{}")
+
 
 print(agent_prompt)
 class LlmClient:
