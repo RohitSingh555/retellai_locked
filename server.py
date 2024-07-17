@@ -1,6 +1,8 @@
+
+import asyncio
 import json
 import os
-import asyncio
+import sys
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, PlainTextResponse
@@ -14,19 +16,14 @@ from custom_types import (
     ResponseRequiredRequest,
 )
 from llm import LlmClient  # or use .llm_with_func_calling
+from fastapi import FastAPI
+from fastapi.logger import logger
 
 load_dotenv(override=True)
 app = FastAPI()
 retell = Retell(api_key=os.environ["RETELL_API_KEY"])
 
-# twilio_client.create_phone_number(213, "68978b1c2935ff9c7d7107e61524d0bb")
-# twilio_client.delete_phone_number("+12133548310")
-# twilio_client.register_inbound_agent("+13392016322", "68978b1c2935ff9c7d7107e61524d0bb")
-# twilio_client.create_phone_call("+13392016322", "+14157122917", "68978b1c2935ff9c7d7107e61524d0bb")
 
-
-# Handle webhook from Retell server. This is used to receive events from Retell server.
-# Including call_started, call_ended, call_analyzed
 @app.post("/webhook")
 async def handle_webhook(request: Request):
     try:
@@ -136,31 +133,40 @@ async def websocket_handler(websocket: WebSocket, call_id: str):
         print(f"LLM WebSocket connection closed for {call_id}")
         
 from api_requests.api_requests import get_call_details
+import boto3
+from io import BytesIO
 
+def download_file_from_s3(bucket_name, prefix, candidate_id):
+    s3 = boto3.client('s3')
+    file_key = f'{prefix}{candidate_id}/{candidate_id}.docx'
+    try:
+        s3_object = s3.get_object(Bucket=bucket_name, Key=file_key)
+        file_content = s3_object['Body'].read()
+        return file_content
+    except Exception as e:
+        print(f"Error downloading file from S3: {e}")
+        return None
 
-def process_files_in_folder(folder_path, output_folder, job_description, company_background):
-    for filename in os.listdir(folder_path):
-        if filename.endswith(".docx"):
-            file_id = filename.split('_')[0]
-            output_filename = f'{file_id}_parsed_transcript.json'
-            output_filepath = os.path.join(output_folder, output_filename)
-            
-            if os.path.exists(output_filepath):
-                print(f"Skipping {filename} as {output_filename} already exists.")
-                continue
-            
-            file_path = os.path.join(folder_path, filename)
-            content = read_docx(file_path)
+def process_file_content(content, output_folder, job_description, company_background, call_details):
+    file_id = "output"
+    output_filename = f'{file_id}_parsed_transcript.json'
+    output_filepath = os.path.join(output_folder, output_filename)
 
-            chain = setup_model()
-            response = chain.invoke({"job_description": job_description, "company_background": company_background, "content": content})
-            response_parsed = json.loads(response.json())
+    chain = setup_model()
+    response = chain.invoke({
+        "job_description": job_description,
+        "company_background": company_background,
+        "content": content,
+        "call_details": call_details
+    })
+    response_parsed = json.loads(response.json())
 
-            with open(output_filepath, 'w') as f:
-                json.dump(response_parsed, f, indent=4)
-            print(response_parsed)
+    with open(output_filepath, 'w') as f:
+        json.dump(response_parsed, f, indent=4)
+    print(response_parsed)
 
-            print(f"Response saved to {output_filename}")
+    print(f"Response saved to {output_filename}")
+    return output_filepath
 
 @app.post("/get_transcript")
 async def get_transcript(request: Request):
@@ -168,37 +174,58 @@ async def get_transcript(request: Request):
     print(f"Received data: {data}")
 
     event = data.get("event")
-    if event != "call_ended":
-        return JSONResponse(content={"error": "Unsupported event type"}, status_code=400)
 
-    call_id = data.get("call", {}).get("call_id")
-    print(f"Call ID: {call_id}")
-    if not call_id:
-        return JSONResponse(content={"error": "Call ID not found in the request data"}, status_code=400)
-    
-    token = os.getenv("RETELL_API_KEY")
-    if not token:
-        return JSONResponse(content={"error": "API token not found"}, status_code=500)
-    
-    try:
-        call_details = get_call_details(call_id, token)
-    except requests.RequestException as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-    
-    print("\n\n\n")
-    print(call_details)
+    print(data.get("candidate_id"))
 
-    job_description = "Senior Data Scientist at Moderna. This role involves developing and overseeing Immuno-Assay development, essential for Moderna's research and vaccine production efforts."
-    company_background = "Moderna is a biotechnology company pioneering messenger RNA (mRNA) therapeutics and vaccines. We aim to transform how medicines are created and delivered, focusing on preventing and fighting diseases."
-    transcripts_folder = 'transcripts'
-    output_folder = transcripts_folder 
+    if not data.get("candidate_id"):
+        candidate_id=1
+    else:
+        candidate_id = data.get("candidate_id")
+ 
+    
 
-    process_files_in_folder(output_folder, output_folder, job_description, company_background)
-    
-    bucket_name = 'sample-candidates-pluto-dev'
-    prefix = 'user_data/'
-    local_folder = 'transcripts/'
-    
-    move_files_to_user_folders(local_folder, bucket_name, prefix)
+    if event == "call_ended":
+        # return JSONResponse(content={"error": "Unsupported event type"}, status_code=400)
+
+        call_id = data.get("call", {}).get("call_id")
+        print(f"Call ID: {call_id}")
+        if not call_id:
+            return JSONResponse(content={"error": "Call ID not found in the request data"}, status_code=400)
+        
+        token = os.getenv("RETELL_API_KEY")
+        if not token:
+            return JSONResponse(content={"error": "API token not found"}, status_code=500)
+        
+        try:
+            call_details = get_call_details(call_id, token)
+        except requests.RequestException as e:
+            return JSONResponse(content={"error": str(e)}, status_code=500)
+        
+        print(call_details)
+        store_call_details_url = "http://localhost:8500/store_call_details"
+        store_call_details_payload = {
+            "call_id": call_id,
+            "call_details": call_details
+        }
+        store_call_details_response = requests.post(store_call_details_url, json=store_call_details_payload)
+
+        if store_call_details_response.status_code != 201:
+            return JSONResponse(content={"message": "Failed to store call details", "status": store_call_details_response.status_code, "error": store_call_details_response.text})
+        bucket_name = 'sample-candidates-pluto-dev'
+        prefix = 'user_data/'
+        file_content = download_file_from_s3(bucket_name, prefix, candidate_id)
+        if not file_content:
+            return JSONResponse(content={"error": "Failed to download file from S3"}, status_code=500)
+
+        # Process the file content
+        job_description = "Senior Data Scientist at Moderna. This role involves developing and overseeing Immuno-Assay development, essential for Moderna's research and vaccine production efforts."
+        company_background = "Moderna is a biotechnology company pioneering messenger RNA (mRNA) therapeutics and vaccines. We aim to transform how medicines are created and delivered, focusing on preventing and fighting diseases."
+        transcripts_folder = 'transcripts'
+
+        content = read_docx(BytesIO(file_content))  # Assuming read_docx is a function to read docx content
+        output_filepath = process_file_content(content, transcripts_folder, job_description, company_background, call_details)
+        
+        # Move the processed files to user folders in S3
+        move_files_to_user_folders(transcripts_folder, bucket_name, prefix)
 
     return JSONResponse(content={"message": "Data received and processed"})
