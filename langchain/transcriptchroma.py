@@ -1,25 +1,38 @@
 import os
 import json
 import boto3
-from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 import chromadb
 import ollama
-from dotenv import load_dotenv
+import time
+import logging
 
 load_dotenv()
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 s3 = boto3.client('s3', region_name='us-east-1')
 bucket_name = 'sample-candidates-pluto-dev'
-prefix = 'user_data/'
+prefix = 'user_data_1/'
 
 def initialize_chromadb():
-    try:
-        chroma = chromadb.HttpClient(host="localhost", port=8000)
-        print("ChromaDB connection initialized successfully.")
-        return chroma
-    except Exception as e:
-        print(f"Failed to initialize ChromaDB connection: {e}")
-        return None
+    retries = 3
+    delay = 2
+    for attempt in range(retries):
+        try:
+            chroma = chromadb.HttpClient(host="localhost", port=7000)
+            logger.info("ChromaDB connection initialized successfully.")
+            return chroma
+        except Exception as e:
+            logger.error(f"Attempt {attempt+1}: Failed to initialize ChromaDB connection: {e}")
+            if attempt < retries - 1:
+                logger.info(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                logger.error("Max retries exceeded. Unable to initialize ChromaDB.")
+                return None
 
 def fetch_data_from_s3(bucket_name, prefix):
     file_keys = []
@@ -42,7 +55,7 @@ def fetch_data_from_s3(bucket_name, prefix):
             else:
                 break
         except Exception as e:
-            print(f"Failed to list objects in S3: {e}")
+            logger.error(f"Failed to list objects in S3: {e}")
             break
 
     return file_keys
@@ -56,26 +69,26 @@ def extract_and_store_data(file_key, bucket_name, collection_name):
             json_data = json.load(f)
         
         if 'summary' not in json_data:
-            print(f"Missing 'summary' key in {file_key}. Skipping this file.")
+            logger.warning(f"Missing 'summary' key in {file_key}. Skipping this file.")
             os.remove(local_filename)
             return
         
         modified_data = {
             "summary": json_data["summary"],
-            "strengths": json_data["strengths"],
-            "weaknesses": json_data["weaknesses"],
-            "cultural_fit": json_data["cultural_fit"],
-            "decision": json_data["decision"]
+            "strengths": json_data.get("strengths", ""),
+            "weaknesses": json_data.get("weaknesses", ""),
+            "cultural_fit": json_data.get("cultural_fit", ""),
+            "decision": json_data.get("decision", "")
         }
 
         store_json_data_in_chroma(modified_data, collection_name)
         
-        print(f"Stored data from {file_key} in ChromaDB")
+        logger.info(f"Stored data from {file_key} in ChromaDB")
         
         os.remove(local_filename)
         
     except Exception as e:
-        print(f"Error processing file {file_key}: {e}")
+        logger.error(f"Error processing file {file_key}: {e}")
 
 def convert_metadata(metadata):
     converted_metadata = {}
@@ -89,22 +102,23 @@ def convert_metadata(metadata):
 def store_json_data_in_chroma(json_data, collection_name, embedmodel='nomic-embed-text'):
     chroma = initialize_chromadb()
     if not chroma:
+        logger.error("ChromaDB not initialized. Unable to store data.")
         return
     
     try:
         collection = chroma.get_or_create_collection(collection_name)
-        print(f"Collection '{collection_name}' accessed or created successfully.")
+        logger.info(f"Collection '{collection_name}' accessed or created successfully.")
     except Exception as e:
-        print(f"Failed to access or create collection '{collection_name}': {e}")
+        logger.error(f"Failed to access or create collection '{collection_name}': {e}")
         return
 
     try:
         text_content = json_data['summary']
         metadata = {
-            "strengths": json_data["strengths"],
-            "weaknesses": json_data["weaknesses"],
-            "cultural_fit": json_data["cultural_fit"],
-            "decision": json_data["decision"]
+            "strengths": json_data.get("strengths", ""),
+            "weaknesses": json_data.get("weaknesses", ""),
+            "cultural_fit": json_data.get("cultural_fit", ""),
+            "decision": json_data.get("decision", "")
         }
 
         metadata = convert_metadata(metadata)
@@ -119,17 +133,17 @@ def store_json_data_in_chroma(json_data, collection_name, embedmodel='nomic-embe
             metadatas=[metadata]
         )
         
-        print(f"Data stored successfully in ChromaDB with embeddings and metadata.")
+        logger.info(f"Data stored successfully in ChromaDB with embeddings and metadata.")
 
     except Exception as e:
-        print(f"Error storing data in ChromaDB: {e}")
+        logger.error(f"Error storing data in ChromaDB: {e}")
 
 def main():
     collection_name = "sample_candidates_pluto_data"
 
     file_keys = fetch_data_from_s3(bucket_name, prefix)
     if not file_keys:
-        print(f"No files found in S3 bucket {bucket_name}/{prefix}")
+        logger.warning(f"No files found in S3 bucket {bucket_name}/{prefix}")
         return
 
     for file_key in file_keys:

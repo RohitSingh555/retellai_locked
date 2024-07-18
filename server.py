@@ -137,7 +137,7 @@ import boto3
 from io import BytesIO
 
 def download_file_from_s3(bucket_name, prefix, candidate_id):
-    s3 = boto3.client('s3')
+    s3 = boto3.client('s3', region_name='us-east-1')
     file_key = f'{prefix}{candidate_id}/{candidate_id}.docx'
     try:
         s3_object = s3.get_object(Bucket=bucket_name, Key=file_key)
@@ -172,7 +172,7 @@ def process_file_content(content, output_folder, job_description, company_backgr
 async def get_transcript(request: Request):
     data = await request.json()
     print(f"Received data: {data}")
-
+    
     event = data.get("event")
 
     print(data.get("candidate_id"))
@@ -202,12 +202,18 @@ async def get_transcript(request: Request):
             return JSONResponse(content={"error": str(e)}, status_code=500)
         
         print(call_details)
-        store_call_details_url = "http://localhost:8500/store_call_details"
+        store_call_details_url = "http://127.0.0.1:8000/store_call_details/"
         store_call_details_payload = {
-            "call_id": call_id,
-            "call_details": call_details
+            "candidate": 1,
+            "pdf_url": "http://example.com/file.pdf",
+            "call_summary": "call_details",
+            "transcript": "call_details",
+            "resume_analysis": "call_details",
         }
-        store_call_details_response = requests.post(store_call_details_url, json=store_call_details_payload)
+        headers = {
+            'Content-Type': 'application/json',
+        }
+        store_call_details_response = requests.post(store_call_details_url, json=store_call_details_payload, headers=headers)
 
         if store_call_details_response.status_code != 201:
             return JSONResponse(content={"message": "Failed to store call details", "status": store_call_details_response.status_code, "error": store_call_details_response.text})

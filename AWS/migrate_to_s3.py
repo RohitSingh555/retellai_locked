@@ -6,9 +6,9 @@ s3 = boto3.client('s3', region_name='us-east-1')
 
 bucket_name = 'sample-candidates-pluto-dev'
 
-prefix = 'user_data/'
+prefix = 'user_data_1/'
 
-local_folder = 'transcripts/'
+local_folder = '../transcripts'
 
 def file_exists_in_s3(bucket, key):
     try:

@@ -91,35 +91,35 @@ def setup_model():
     return chain
 
 
-# def process_files_in_folder(folder_path, output_folder, job_description, company_background):
-#     for filename in os.listdir(folder_path):
-#         if filename.endswith(".docx"):
-#             file_id = filename.split('_')[0]
-#             output_filename = f'{file_id}_parsed_transcript.json'
-#             output_filepath = os.path.join(output_folder, output_filename)
+def process_files_in_folder(folder_path, output_folder, job_description, company_background):
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".docx"):
+            file_id = filename.split('_')[0]
+            output_filename = f'{file_id}_parsed_transcript.json'
+            output_filepath = os.path.join(output_folder, output_filename)
             
-#             if os.path.exists(output_filepath):
-#                 print(f"Skipping {filename} as {output_filename} already exists.")
-#                 continue
+            if os.path.exists(output_filepath):
+                print(f"Skipping {filename} as {output_filename} already exists.")
+                continue
             
-#             file_path = os.path.join(folder_path, filename)
-#             content = read_docx(file_path)
+            file_path = os.path.join(folder_path, filename)
+            content = read_docx(file_path)
 
-#             chain = setup_model()
-#             response = chain.invoke({"job_description": job_description, "company_background": company_background, "content": content})
-#             response_parsed = json.loads(response.json())
+            chain = setup_model()
+            response = chain.invoke({"job_description": job_description, "company_background": company_background, "content": content})
+            response_parsed = json.loads(response.json())
 
-#             with open(output_filepath, 'w') as f:
-#                 json.dump(response_parsed, f, indent=4)
-#             print(response_parsed)
+            with open(output_filepath, 'w') as f:
+                json.dump(response_parsed, f, indent=4)
+            print(response_parsed)
 
-#             print(f"Response saved to {output_filename}")
+            print(f"Response saved to {output_filename}")
 
 
-# job_description = "Senior Data Scientist at Moderna. This role involves developing and overseeing Immuno-Assay development, essential for Moderna's research and vaccine production efforts."
-# company_background = "Moderna is a biotechnology company pioneering messenger RNA (mRNA) therapeutics and vaccines. We aim to transform how medicines are created and delivered, focusing on preventing and fighting diseases."
+job_description = "Senior Data Scientist at Moderna. This role involves developing and overseeing Immuno-Assay development, essential for Moderna's research and vaccine production efforts."
+company_background = "Moderna is a biotechnology company pioneering messenger RNA (mRNA) therapeutics and vaccines. We aim to transform how medicines are created and delivered, focusing on preventing and fighting diseases."
 
-# transcripts_folder = '../transcripts'
-# output_folder = transcripts_folder  # Output in the same folder
+transcripts_folder = '../transcripts'
+output_folder = transcripts_folder  # Output in the same folder
 
-# process_files_in_folder(transcripts_folder, output_folder, job_description, company_background)
+process_files_in_folder(transcripts_folder, output_folder, job_description, company_background)

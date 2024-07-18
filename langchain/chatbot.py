@@ -5,7 +5,7 @@ from datetime import datetime
 
 def initialize_chromadb():
     try:
-        chroma = chromadb.HttpClient(host="localhost", port=8000)
+        chroma = chromadb.HttpClient(host="localhost", port=7000)
         return chroma
     except ImportError:
         print("ChromaDB module not found.")
@@ -45,8 +45,8 @@ def chatbot(collection_name):
     chat_history.add_message("system", "You are an expert assistant. Provide concise and accurate responses based on the provided information.")
     
     while True:
-        user_input = input("You: ").strip().lower()
-        print("/n")
+        user_input = input("\nYou: ").strip().lower()
+        print("\n")
         if user_input in ["exit", "quit", "bye"]:
             print("Chatbot: Goodbye!")
             break
@@ -54,6 +54,16 @@ def chatbot(collection_name):
         chat_history.add_message("human", user_input)
 
         response = ollama.embeddings(model='nomic-embed-text', prompt=user_input)
+        job_description_analysis={
+  "company_name": "Moderna",
+  "background_summary": "Moderna, founded in 2010, is a leading biotechnology company specializing in mRNA technology for developing medicines. They are committed to revolutionizing medicine through innovation, with a focus on creating a diverse pipeline of mRNA-based therapies across various diseases. Moderna values inclusivity, scientific excellence, and global health impact.",
+  "job_description_summary": "Moderna is seeking a Senior Scientist to join their Immuno-Assays group, responsible for leading immunoassay development and validation across multiple therapeutic areas. The role involves designing and executing complex experiments, ensuring high-quality scientific principles in immunoassays, and contributing to clinical trials.",
+  "top_skills": [
+    "Immunoassay development and validation",
+    "Scientific strategy implementation",
+    "Ex vivo experimental design"
+  ]
+}
         embeddings = response.get("embedding", [])
 
         if not embeddings:
@@ -83,7 +93,7 @@ def chatbot(collection_name):
 
 # Main function
 def main():
-    collection_name = "sample_candidates_pluto_data"
+    collection_name = "sample_candidates_pluto"
     chatbot(collection_name)
 
 if __name__ == "__main__":
