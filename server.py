@@ -1,12 +1,15 @@
 
 import asyncio
 import json
+import logging
 import os
 import sys
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Header, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, PlainTextResponse
 from concurrent.futures import TimeoutError as ConnectionTimeoutError
+import httpx
+from pydantic import BaseModel
 import requests
 from retell import Retell
 from AWS.migrate_to_s3 import move_files_to_user_folders
@@ -168,70 +171,117 @@ def process_file_content(content, output_folder, job_description, company_backgr
     print(f"Response saved to {output_filename}")
     return output_filepath
 
+class DetailsRequestBody(BaseModel):
+    candidate_id: int
+    job_description: str
+    company_details: str
+    resume_analysis: str
+
+@app.post("/details_from_db")
+async def details_from_db(request: Request, body: DetailsRequestBody):
+    # Construct payload for handle_webhook
+    payload = {
+        "event": "call_ended",  # or appropriate event type based on your logic
+        "data": {
+            "call_id": body.candidate_id
+        }
+    }
+
+    # Pass the payload to handle_webhook
+    try:
+        # Assuming handle_webhook is modified to accept parameters directly
+        response = await handle_webhook(Request(
+            body=json.dumps(payload),
+            headers={"x-retell-signature": "dummy_signature"}  # Provide a dummy or actual signature if needed
+        ))
+        return response
+    except Exception as e:
+        logging.error(f"Error processing details_from_db: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+# Your existing handle_webhook function
 @app.post("/get_transcript")
-async def get_transcript(request: Request):
-    data = await request.json()
-    print(f"Received data: {data}")
-    
-    event = data.get("event")
+async def handle_webhook(request: Request, x_retell_signature: str = Header(None)):
+    try:
+        post_data = await request.json()
+        valid_signature = retell.verify(
+            json.dumps(post_data, separators=(",", ":")),
+            api_key=os.environ["RETELL_API_KEY"],
+            signature=x_retell_signature,
+        )
+        if not valid_signature:
+            logging.error("Received Unauthorized: %s, %s", post_data["event"], post_data["data"]["call_id"])
+            return JSONResponse(status_code=401, content={"message": "Unauthorized"})
 
-    print(data.get("candidate_id"))
+        event = post_data.get("event")
+        data = post_data.get("data", {})
+        call_id = data.get("call_id")
 
-    if not data.get("candidate_id"):
-        candidate_id=1
-    else:
-        candidate_id = data.get("candidate_id")
- 
-    
+        if event == "call_started":
+            logging.info("Call started event: %s", call_id)
+        elif event == "call_ended":
+            logging.info("Call ended event: %s", call_id)
+            if not call_id:
+                return JSONResponse(content={"error": "Call ID not found in the request data"}, status_code=400)
+            
+            token = os.getenv("RETELL_API_KEY")
+            if not token:
+                return JSONResponse(content={"error": "API token not found"}, status_code=500)
+            
+            try:
+                call_details = get_call_details(call_id, token)  # Assuming get_call_details is synchronous, adjust if not
+            except requests.RequestException as e:
+                return JSONResponse(content={"error": str(e)}, status_code=500)
+            
+            call_id = call_details.get('call_id')
+            transcript = call_details.get('transcript')
+            call_analysis = call_details.get('call_analysis')
+            call_summary = call_analysis.get('call_summary') if call_analysis else None
 
-    if event == "call_ended":
-        # return JSONResponse(content={"error": "Unsupported event type"}, status_code=400)
+            logging.info("Call ID: %s", call_id)
+            logging.info("Transcript: %s", transcript)
+            logging.info("Call Analysis: %s", call_analysis)
+            logging.info("Call Summary: %s", call_summary)
+            
+            store_call_details_url = "http://127.0.0.1:8500/store_call_details/"
+            store_call_details_payload = {
+                "candidate": 1,
+                "pdf_url": "http://example.com/file.pdf",
+                "call_summary": call_summary,
+                "transcript": transcript,
+                "resume_analysis": "call_details",
+            }
+            headers = {
+                'Content-Type': 'application/json',
+            }
+            async with httpx.AsyncClient() as client:
+                store_call_details_response = await client.post(store_call_details_url, json=store_call_details_payload, headers=headers)
 
-        call_id = data.get("call", {}).get("call_id")
-        print(f"Call ID: {call_id}")
-        if not call_id:
-            return JSONResponse(content={"error": "Call ID not found in the request data"}, status_code=400)
+            if store_call_details_response.status_code != 201:
+                return JSONResponse(content={"message": "Failed to store call details", "status": store_call_details_response.status_code, "error": store_call_details_response.text})
+            
+            bucket_name = 'sample-candidates-pluto-dev'
+            prefix = 'user_data_1/'
+            local_folder = '/transcripts'
+            
+            file_content = move_files_to_user_folders(local_folder, bucket_name, prefix)
+            if not file_content:
+                return JSONResponse(content={"error": "Failed to download file from S3"}, status_code=500)
+
+            job_description = "Senior Data Scientist at Moderna. This role involves developing and overseeing Immuno-Assay development, essential for Moderna's research and vaccine production efforts."
+            company_background = "Moderna is a biotechnology company pioneering messenger RNA (mRNA) therapeutics and vaccines. We aim to transform how medicines are created and delivered, focusing on preventing and fighting diseases."
+            transcripts_folder = 'transcripts'
+
+            content = read_docx(BytesIO(file_content))  # Assuming read_docx is a function to read docx content
+            output_filepath = process_file_content(content, transcripts_folder, job_description, company_background, call_details)
+            
+            move_files_to_user_folders(transcripts_folder, bucket_name, prefix)
         
-        token = os.getenv("RETELL_API_KEY")
-        if not token:
-            return JSONResponse(content={"error": "API token not found"}, status_code=500)
+        elif event == "call_analyzed":
+            logging.info("Call analyzed event: %s", call_id)
+        else:
+            logging.warning("Unknown event: %s", event)
         
-        try:
-            call_details = get_call_details(call_id, token)
-        except requests.RequestException as e:
-            return JSONResponse(content={"error": str(e)}, status_code=500)
-        
-        print(call_details)
-        store_call_details_url = "http://127.0.0.1:8000/store_call_details/"
-        store_call_details_payload = {
-            "candidate": 1,
-            "pdf_url": "http://example.com/file.pdf",
-            "call_summary": "call_details",
-            "transcript": "call_details",
-            "resume_analysis": "call_details",
-        }
-        headers = {
-            'Content-Type': 'application/json',
-        }
-        store_call_details_response = requests.post(store_call_details_url, json=store_call_details_payload, headers=headers)
-
-        if store_call_details_response.status_code != 201:
-            return JSONResponse(content={"message": "Failed to store call details", "status": store_call_details_response.status_code, "error": store_call_details_response.text})
-        bucket_name = 'sample-candidates-pluto-dev'
-        prefix = 'user_data/'
-        file_content = download_file_from_s3(bucket_name, prefix, candidate_id)
-        if not file_content:
-            return JSONResponse(content={"error": "Failed to download file from S3"}, status_code=500)
-
-        # Process the file content
-        job_description = "Senior Data Scientist at Moderna. This role involves developing and overseeing Immuno-Assay development, essential for Moderna's research and vaccine production efforts."
-        company_background = "Moderna is a biotechnology company pioneering messenger RNA (mRNA) therapeutics and vaccines. We aim to transform how medicines are created and delivered, focusing on preventing and fighting diseases."
-        transcripts_folder = 'transcripts'
-
-        content = read_docx(BytesIO(file_content))  # Assuming read_docx is a function to read docx content
-        output_filepath = process_file_content(content, transcripts_folder, job_description, company_background, call_details)
-        
-        # Move the processed files to user folders in S3
-        move_files_to_user_folders(transcripts_folder, bucket_name, prefix)
-
-    return JSONResponse(content={"message": "Data received and processed"})
+        return JSONResponse(status_code=204, content={"message": "Event processed successfully"})
+    except Exception as err:
+        logging.error(f"Error in webhook: {err}")
+        return JSONResponse(status_code=500, content={"message": "Internal Server Error"})

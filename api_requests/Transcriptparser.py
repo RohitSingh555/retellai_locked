@@ -119,7 +119,7 @@ def process_files_in_folder(folder_path, output_folder, job_description, company
 job_description = "Senior Data Scientist at Moderna. This role involves developing and overseeing Immuno-Assay development, essential for Moderna's research and vaccine production efforts."
 company_background = "Moderna is a biotechnology company pioneering messenger RNA (mRNA) therapeutics and vaccines. We aim to transform how medicines are created and delivered, focusing on preventing and fighting diseases."
 
-transcripts_folder = '../transcripts'
-output_folder = transcripts_folder  # Output in the same folder
+# # transcripts_folder = '../transcripts'
+# output_folder = transcripts_folder  # Output in the same folder
 
-process_files_in_folder(transcripts_folder, output_folder, job_description, company_background)
+# process_files_in_folder(transcripts_folder, output_folder, job_description, company_background)
