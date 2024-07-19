@@ -162,3 +162,8 @@ cython_debug/
 .env_internal
 
 .env2
+.bin
+49be7fd6-144d-4773-82ab-70a3f376a4d5/data_level0.bin
+49be7fd6-144d-4773-82ab-70a3f376a4d5/header.bin
+49be7fd6-144d-4773-82ab-70a3f376a4d5/length.bin
+49be7fd6-144d-4773-82ab-70a3f376a4d5/link_lists.bin
