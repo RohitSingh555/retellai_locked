@@ -8,7 +8,7 @@ bucket_name = 'sample-candidates-pluto-dev'
 
 prefix = 'user_data_1/'
 
-local_folder = '../transcripts'
+# local_folder = '../transcripts'
 
 def file_exists_in_s3(bucket, key):
     try:
@@ -37,4 +37,4 @@ def move_files_to_user_folders(local_folder, bucket_name, prefix):
                 print(f"No user id found in {file_name}")
 
 
-move_files_to_user_folders(local_folder, bucket_name, prefix)
+# move_files_to_user_folders(local_folder, bucket_name, prefix)
